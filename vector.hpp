@@ -23,16 +23,46 @@ class vector
 {
     public:
 
+        class iterator {
+
+            private:
+
+                typename Alloc::pointer PtrToBuff;
+
+            public:
+
+                typedef std::random_access_iterator_tag     iterator_category;
+                typedef T                                   value_type;
+                typedef T*                                  pointer;
+                typedef T&                                  reference;
+                typedef std::ptrdiff_t                      difference_type;
+
+                iterator(pointer ptr) : PtrToBuff(ptr) {}
+
+                reference operator*() const { return *PtrToBuff; }
+                pointer operator->() { return PtrToBuff; }
+
+                // Prefix increment
+                iterator& operator++() { PtrToBuff++; return *this; }  
+
+                // Postfix increment
+                iterator operator++(int) { iterator tmp = *this; ++(*this); return tmp; }
+
+                friend bool operator== (const iterator& a, const iterator& b) { return a.PtrToBuff == b.PtrToBuff; };
+                friend bool operator!= (const iterator& a, const iterator& b) { return a.PtrToBuff != b.PtrToBuff; };    
+        };
+
+
         typedef T                                                   value_type;
         typedef Alloc                                               allocator_type;
         typedef typename allocator_type::reference                  reference;
         typedef typename allocator_type::const_reference            const_reference;
         typedef typename allocator_type::pointer                    pointer;
         typedef typename allocator_type::const_pointer              const_pointer;
-        typedef pointer                                             iterator;
-        typedef const_pointer                                       const_iterator;
-        typedef std::reverse_iterator<iterator>                     reverse_iterator;
-        typedef std::reverse_iterator<const_iterator>               const_reverse_iterator;
+        typedef vector::iterator                                    iterator;
+        // typedef const_pointer                                       const_iterator;
+        // typedef std::reverse_iterator<iterator>                     reverse_iterator;
+        // typedef std::reverse_iterator<const_iterator>               const_reverse_iterator;
         typedef ptrdiff_t                                           difference_type;
         typedef size_t                                              size_type;
 
@@ -41,15 +71,16 @@ class vector
         value_type          *buff;
         size_type           _capacity;
         size_type           _size;
+        allocator_type      _allocator;
 
         void        reallocate(void)
         {
             size_type       newCapacity = (!_capacity) ? 1 : 2 * _capacity;
-            value_type      *ptr = allocator_type().allocate(newCapacity);
+            value_type      *ptr = _allocator.allocate(newCapacity);
 
             for (size_type i = 0; i < _size; i++)
                 ptr[i] = buff[i];
-            allocator_type().deallocate(buff, _capacity);
+            _allocator.deallocate(buff, _capacity);
             buff = ptr;
             _capacity = newCapacity;
         }
@@ -58,31 +89,31 @@ class vector
 
         explicit vector (): _capacity(0), _size(0) {}
         explicit vector (size_type n, const value_type& val): _capacity(n), _size(0) {
-            buff = allocator_type().allocate(_capacity);
+            buff = _allocator.allocate(_capacity);
             for (size_type i = 0; i < n; ++i)
                 buff[_size++] = val;
         }
         template <class InputIterator>
         vector (InputIterator first, InputIterator last): _capacity(last - first), _size(0) {
-            buff = allocator_type().allocate(_capacity);
+            buff = _allocator.allocate(_capacity);
             while (first != last)
                 buff[_size++] = *first++;
         }
         vector (const vector& x): _capacity(x.size()), _size(0) {
-            buff = allocator_type().allocate(_capacity);
+            buff = _allocator.allocate(_capacity);
             for (size_type i = 0; i < x.size(); ++i) {
                 buff[_size] = x[_size];
                 ++_size;
             }
         }
         ~vector () {
-            allocator_type().deallocate(buff, _capacity);
+            _allocator.deallocate(buff, _capacity);
             // invalidate its/ref/ptrs.
         }
         vector& operator= (const vector& x) {
             _capacity = x.size();
             _size = 0;
-            buff = allocator_type().allocate(buff, _capacity);
+            buff = _allocator.allocate(buff, _capacity);
             for (size_type i = 0; i < x.size(); ++i) {
                 buff[_size] = x[_size];
                 ++_size;
@@ -91,17 +122,17 @@ class vector
 
         // Iterators:
         iterator begin() { return buff; }
-        const_iterator begin() const { return buff; }
+        // const_iterator begin() const { return buff; }
         iterator end(){ return buff + _size; };
-        const_iterator end() const { return buff + _size; }
-        reverse_iterator rbegin() { return buff + _size; }
-        const_reverse_iterator rbegin() const { return buff + _size; }
-        reverse_iterator rend() { return buff; }
-        const_reverse_iterator rend() const { return buff; }
+        // const_iterator end() const { return buff + _size; }
+        // reverse_iterator rbegin() { return buff + _size; }
+        // const_reverse_iterator rbegin() const { return buff + _size; }
+        // reverse_iterator rend() { return buff; }
+        // const_reverse_iterator rend() const { return buff; }
 
         //Capacity:
         size_type   size() const {return _size; }
-        size_type   max_size() const { return allocator_type().max_size(); }
+        size_type   max_size() const { return _allocator.max_size(); }
         size_type   capacity() const { return _capacity; }
         bool        empty() const { return((!_size) ? true: false); }
         void        resize (size_type n) {
@@ -110,10 +141,10 @@ class vector
             else if (n > _size) {
                 if (n > _capacity) {
                     _capacity = n;
-                    value_type* ptr = allocator_type().alloc(_capacity);
+                    value_type* ptr = _allocator.alloc(_capacity);
                     for (size_type i = 0; i < _size; i++)
                         ptr[i] = buff[i];
-                    allocator_type().deallocate(buff, _capacity);
+                    _allocator.deallocate(buff, _capacity);
                     buff = ptr;
                 }
                 for (_size; _size < n; ++_size)
@@ -126,10 +157,10 @@ class vector
             else if (n > _size) {
                 if (n > _capacity) {
                     _capacity = n;
-                    value_type* ptr = allocator_type().alloc(_capacity);
+                    value_type* ptr = _allocator.alloc(_capacity);
                     for (size_type i = 0; i < _size; i++)
                         ptr[i] = buff[i];
-                    allocator_type().deallocate(buff, _capacity);
+                    _allocator.deallocate(buff, _capacity);
                     buff = ptr;
                 }
                 for (_size; _size < n; ++_size)
@@ -140,10 +171,10 @@ class vector
         {
             if (n > _capacity)
             {
-                value_type      *ptr = allocator_type().allocate(n);
+                value_type      *ptr = _allocator.allocate(n);
                 for (size_type i = 0; i < _size; i++)
                     ptr[i] = buff[i];
-                allocator_type().deallocate(buff, _capacity);
+                _allocator.deallocate(buff, _capacity);
                 buff = ptr;
                 _capacity = n;
             }
@@ -183,8 +214,8 @@ class vector
         void assign (InputIterator first, InputIterator last) {
             if (last - first > _capacity) {
                 _capacity = last - first;
-                allocator_type().deallocate(buff, _capacity);
-                buff = allocator_type().allocate(_capacity);
+                _allocator.deallocate(buff, _capacity);
+                buff = _allocator.allocate(_capacity);
             }
             for (_size = 0; _size < last - first; ++_size) {
                 buff[_size] = *first++;
@@ -193,8 +224,8 @@ class vector
         void assign (size_type n, const value_type& val) {
             if (n > _capacity) {
                 _capacity = n;
-                allocator_type().deallocate(buff, _capacity);
-                buff = allocator_type().allocate(_capacity);
+                _allocator.deallocate(buff, _capacity);
+                buff = _allocator.allocate(_capacity);
             }
             for (_size = 0; _size < n; ++_size) {
                 buff[_size] = val;
@@ -210,7 +241,7 @@ class vector
 
         void clear() { _size = 0; }
         allocator_type get_allocator() const {
-            return allocator_type();
+            return _allocator;
         }
 
 };
