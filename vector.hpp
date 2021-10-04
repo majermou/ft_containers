@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: majermou <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/09/17 09:38:05 by majermou          #+#    #+#             */
-/*   Updated: 2021/09/17 09:38:50 by majermou         ###   ########.fr       */
+/*   Created: 2021/10/04 17:16:22 by majermou          #+#    #+#             */
+/*   Updated: 2021/10/04 17:16:23 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,44 +14,16 @@
 #define VECTOR_HPP
 
 #include <iostream>
-#include <iterator>
+
+template <typename T, typename Alloc = std::allocator<T> > class __normal_iterator;
+template <typename T, typename Alloc = std::allocator<T> > class __reverse_iterator;
 
 namespace ft {
 
 template < class T, class Alloc = std::allocator<T> >
-class vector
-{
+class vector {
+
     public:
-
-        class iterator {
-
-            private:
-
-                typename Alloc::pointer PtrToBuff;
-
-            public:
-
-                typedef std::random_access_iterator_tag     iterator_category;
-                typedef T                                   value_type;
-                typedef T*                                  pointer;
-                typedef T&                                  reference;
-                typedef std::ptrdiff_t                      difference_type;
-
-                iterator(pointer ptr) : PtrToBuff(ptr) {}
-
-                reference operator*() const { return *PtrToBuff; }
-                pointer operator->() { return PtrToBuff; }
-
-                // Prefix increment
-                iterator& operator++() { PtrToBuff++; return *this; }  
-
-                // Postfix increment
-                iterator operator++(int) { iterator tmp = *this; ++(*this); return tmp; }
-
-                friend bool operator== (const iterator& a, const iterator& b) { return a.PtrToBuff == b.PtrToBuff; };
-                friend bool operator!= (const iterator& a, const iterator& b) { return a.PtrToBuff != b.PtrToBuff; };    
-        };
-
 
         typedef T                                                   value_type;
         typedef Alloc                                               allocator_type;
@@ -59,10 +31,10 @@ class vector
         typedef typename allocator_type::const_reference            const_reference;
         typedef typename allocator_type::pointer                    pointer;
         typedef typename allocator_type::const_pointer              const_pointer;
-        typedef vector::iterator                                    iterator;
-        // typedef const_pointer                                       const_iterator;
-        // typedef std::reverse_iterator<iterator>                     reverse_iterator;
-        // typedef std::reverse_iterator<const_iterator>               const_reverse_iterator;
+        typedef __normal_iterator<value_type>                       iterator;
+        typedef __normal_iterator<const iterator>                   const_iterator;
+        typedef __reverse_iterator<value_type>                      reverse_iterator;
+        typedef __reverse_iterator<const reverse_iterator>          const_reverse_iterator;
         typedef ptrdiff_t                                           difference_type;
         typedef size_t                                              size_type;
 
@@ -121,14 +93,14 @@ class vector
         }
 
         // Iterators:
-        iterator begin() { return buff; }
-        // const_iterator begin() const { return buff; }
-        iterator end(){ return buff + _size; };
-        // const_iterator end() const { return buff + _size; }
-        // reverse_iterator rbegin() { return buff + _size; }
-        // const_reverse_iterator rbegin() const { return buff + _size; }
-        // reverse_iterator rend() { return buff; }
-        // const_reverse_iterator rend() const { return buff; }
+        iterator begin() { return iterator(buff); }
+        const_iterator begin() const { return const_iterator(buff); }
+        iterator end() { return iterator(buff + _size); };
+        const_iterator end() const { return const_iterator(buff + _size); }
+        reverse_iterator rbegin() { return reverse_iterator(buff + _size); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(buff + _size); }
+        reverse_iterator rend() { return reverse_iterator(buff); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(buff); }
 
         //Capacity:
         size_type   size() const {return _size; }
@@ -244,8 +216,141 @@ class vector
             return _allocator;
         }
 
+};  // vector class
+
+}   // namespace ft
+
+template <typename T, typename Alloc>
+class __normal_iterator {
+
+    public:
+
+        typedef std::random_access_iterator_tag         iterator_category;
+        typedef T                                       value_type;
+        typedef typename Alloc::pointer                 pointer;
+        typedef typename Alloc::reference               reference;
+        typedef std::ptrdiff_t                          difference_type;
+
+        __normal_iterator(): ptr() {}
+        explicit __normal_iterator(pointer __x): ptr(__x) {}
+        pointer base() const { return ptr; }
+        __normal_iterator(const __normal_iterator<T>& __i): ptr(__i.base()) {}
+
+        reference   operator*() const { 
+            return *ptr;
+        }
+        pointer     operator->() const {
+            return ptr;
+        }
+        __normal_iterator&  operator++() {
+            ++ptr;
+            return *this;
+        }
+        __normal_iterator    operator++(int) {
+            return __normal_iterator(ptr++);
+        }
+        __normal_iterator&  operator--() {
+            --ptr;
+            return *this;
+        }
+        __normal_iterator   operator--(int) {
+            return __normal_iterator(ptr--);
+        }
+        reference    operator[] (difference_type __n) const {
+            return ptr[__n];
+        }
+        __normal_iterator&    operator+= (difference_type __n) {
+            ptr += __n;
+            return *this;
+        }
+        __normal_iterator     operator+ (difference_type __n) {
+            return __normal_iterator(ptr + __n);
+        }
+        __normal_iterator&    operator-= (difference_type __n) {
+            ptr -= __n;
+            return *this;
+        }
+        __normal_iterator&    operator- (difference_type __n) {
+            return __normal_iterator(ptr - __n);
+        }
+        friend bool operator== (const __normal_iterator& x, const __normal_iterator& y) { return x.base() == y.base(); }
+        friend bool operator!= (const __normal_iterator& x, const __normal_iterator& y) { return x.base() != y.base(); };
+        friend bool operator> (const __normal_iterator& x, const __normal_iterator& y) { return x.base() > y.base(); };
+        friend bool operator< (const __normal_iterator& x, const __normal_iterator& y) { return x.base() < y.base(); }; 
+        friend bool operator>= (const __normal_iterator& x, const __normal_iterator& y) { return x.base() >= y.base(); };
+        friend bool operator<= (const __normal_iterator& x, const __normal_iterator& y) { return x.base() <= y.base(); }; 
+        friend difference_type operator- (__normal_iterator& x, __normal_iterator& y) { return x.base() - y.base(); }
+
+    private:
+
+        pointer     ptr;
 };
 
-}
+template <typename T, typename Alloc>
+class __reverse_iterator {
 
-#endif
+    public:
+
+        typedef std::random_access_iterator_tag         iterator_category;
+        typedef T                                       value_type;
+        typedef typename Alloc::pointer                 pointer;
+        typedef typename Alloc::reference               reference;
+        typedef std::ptrdiff_t                          difference_type;
+
+        __reverse_iterator(): ptr() {}
+        explicit __reverse_iterator(pointer __x): ptr(__x) {}
+        pointer base() const { return ptr; }
+        __reverse_iterator(const __reverse_iterator<T>& __i): ptr(__i.base()) {}
+
+        reference   operator*() const {
+            pointer tmp = ptr;
+            return *--tmp;
+        }
+        pointer     operator->() const {
+            return &(operator*());
+        }
+        __reverse_iterator&  operator++() {
+            --ptr;
+            return *this;
+        }
+        __reverse_iterator    operator++(int) {
+            return __reverse_iterator(ptr--);
+        }
+        __reverse_iterator&  operator--() {
+            ++ptr;
+            return *this;
+        }
+        __reverse_iterator   operator--(int) {
+            return __reverse_iterator(ptr++);
+        }
+        __reverse_iterator     operator+(difference_type __n) {
+            return __reverse_iterator(ptr - __n);
+        }
+        __reverse_iterator&    operator+=(difference_type __n) {
+            ptr -= __n;
+            return *this;
+        }
+        __reverse_iterator&    operator-=(difference_type __n) {
+            ptr += __n;
+            return *this;
+        }
+        __reverse_iterator&    operator-(difference_type __n) {
+            return __reverse_iterator(ptr + __n);
+        }
+        reference    operator[](difference_type __n) const {
+            return *(*this + __n);
+        }
+        friend bool operator== (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() == y.base(); }
+        friend bool operator!= (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() != y.base(); };
+        friend bool operator> (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() > y.base(); };
+        friend bool operator< (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() < y.base(); }; 
+        friend bool operator>= (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() >= y.base(); };
+        friend bool operator<= (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() <= y.base(); }; 
+        friend difference_type operator- (__reverse_iterator& x, __reverse_iterator& y) { return x.base() - y.base(); }
+
+    private:
+
+        pointer     ptr;
+};
+
+#endif // VECTOR_HPP
