@@ -231,6 +231,12 @@ class __normal_iterator {
         typedef typename Alloc::reference               reference;
         typedef std::ptrdiff_t                          difference_type;
 
+    private:
+
+        pointer     ptr;
+
+    public:
+
         __normal_iterator(): ptr() {}
         explicit __normal_iterator(pointer __x): ptr(__x) {}
         pointer base() const { return ptr; }
@@ -280,11 +286,23 @@ class __normal_iterator {
         friend bool operator>= (const __normal_iterator& x, const __normal_iterator& y) { return x.base() >= y.base(); };
         friend bool operator<= (const __normal_iterator& x, const __normal_iterator& y) { return x.base() <= y.base(); }; 
         friend difference_type operator- (__normal_iterator& x, __normal_iterator& y) { return x.base() - y.base(); }
-
-    private:
-
-        pointer     ptr;
 };
+
+template <typename T, typename Alloc>
+bool            operator== (const __normal_iterator<T,Alloc>& x, const __normal_iterator<T,Alloc>& y) { return x.base() == y.base(); }
+template <typename T, typename Alloc>
+bool            operator!= (const __normal_iterator<T,Alloc>& x, const __normal_iterator<T,Alloc>& y) { return x.base() != y.base(); }
+template <typename T, typename Alloc>
+bool            operator> (const __normal_iterator<T,Alloc>& x, const __normal_iterator<T,Alloc>& y) { return x.base() > y.base(); }
+template <typename T, typename Alloc>
+bool            operator< (const __normal_iterator<T,Alloc>& x, const __normal_iterator<T,Alloc>& y) { return x.base() < y.base(); }
+template <typename T, typename Alloc>
+bool            operator>= (const __normal_iterator<T,Alloc>& x, const __normal_iterator<T,Alloc>& y) { return x.base() >= y.base(); }
+template <typename T, typename Alloc>
+bool            operator<= (const __normal_iterator<T,Alloc>& x, const __normal_iterator<T,Alloc>& y) { return x.base() <= y.base(); }
+template <typename T, typename Alloc>
+std::ptrdiff_t  operator- (const __normal_iterator<T,Alloc>& x, const __normal_iterator<T,Alloc>& y) { return x.base() - y.base(); }
+
 
 template <typename T, typename Alloc>
 class __reverse_iterator {
@@ -346,7 +364,7 @@ class __reverse_iterator {
         friend bool operator< (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() < y.base(); }; 
         friend bool operator>= (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() >= y.base(); };
         friend bool operator<= (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() <= y.base(); }; 
-        friend difference_type operator- (__reverse_iterator& x, __reverse_iterator& y) { return x.base() - y.base(); }
+        friend difference_type operator- (const __reverse_iterator& x, const __reverse_iterator& y) { return x.base() - y.base(); }
 
     private:
 
