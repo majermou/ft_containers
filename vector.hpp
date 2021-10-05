@@ -279,13 +279,6 @@ class __normal_iterator {
         __normal_iterator&    operator- (difference_type __n) {
             return __normal_iterator(ptr - __n);
         }
-        friend bool operator== (const __normal_iterator& x, const __normal_iterator& y) { return x.base() == y.base(); }
-        friend bool operator!= (const __normal_iterator& x, const __normal_iterator& y) { return x.base() != y.base(); };
-        friend bool operator> (const __normal_iterator& x, const __normal_iterator& y) { return x.base() > y.base(); };
-        friend bool operator< (const __normal_iterator& x, const __normal_iterator& y) { return x.base() < y.base(); }; 
-        friend bool operator>= (const __normal_iterator& x, const __normal_iterator& y) { return x.base() >= y.base(); };
-        friend bool operator<= (const __normal_iterator& x, const __normal_iterator& y) { return x.base() <= y.base(); }; 
-        friend difference_type operator- (__normal_iterator& x, __normal_iterator& y) { return x.base() - y.base(); }
 };
 
 template <typename T, typename Alloc>
