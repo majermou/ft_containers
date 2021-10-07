@@ -5,32 +5,56 @@
 
 #define ns ft
 
+class alpha {
+    public:
+    alpha() {
+        std::cout << "alpha has been constructed\n";
+    }
+};
+
 int main(void)
 {
-    ns::vector<int> vect;
+  ns::vector<int> first;
+  ns::vector<int> second;
+  ns::vector<int> third;
 
-    vect.push_back(1);
-    vect.push_back(0);
-    vect.push_back(4);
-    vect.push_back(2);
+  first.assign (7,100);             // 7 ints with a value of 100
 
-    // std::cout << "iterator : \n";
-    // ns::vector<int>::iterator begin = vect.begin();
-    // ns::vector<int>::iterator end = vect.end();
-    // while (begin != end) {
-    //     std::cout << *begin++ << ' ';
-    // }
-    // std::cout << std::endl;
+  ns::vector<int>::iterator it;
+  it=first.begin()+1;
 
-    bool val = (typeid(std::iterator_traits<ns::vector<int>::iterator>::value_type) == typeid(int)) ? 1: 0;
+  second.assign (it,first.end()-1); // the 5 central values of first
 
-    std::cout << val;
+  int myints[] = {1776,7,4};
+  third.assign (myints,myints+3);   // assigning from array.
+
+  std::cout << "Size of first: " << int (first.size()) << '\n';
+  std::cout << "Size of second: " << int (second.size()) << '\n';
+  std::cout << "Size of third: " << int (third.size()) << '\n';
 
 
-    // std::sort(begin, end);
-    // std::reverse(begin, end);
+  std::cout << "capacity of first: " << int (first.capacity()) << '\n';
+  std::cout << "capacity of second: " << int (second.capacity()) << '\n';
+  std::cout << "capacity of third: " << int (third.capacity()) << '\n';
+  
+
+
+
+
+
+    std::cout << "iterator : \n";
+    ns::vector<int>::iterator ibegin = second.begin();
+    ns::vector<int>::iterator iend = second.end();
+    while (ibegin != iend) {
+        std::cout << *ibegin++ << ' ';
+    }
+    std::cout << std::endl;
     
-    // std::cout << "const_iterator : \n";
+
+    // std::sort(vect.begin(), vect.end());
+    // std::reverse(vect.begin(), vect.end());
+
+    // std::cout << "const_iterator  AFTER sorting and reversing : \n";
     // ns::vector<int>::const_iterator cbegin = vect.begin();
     // ns::vector<int>::const_iterator cend = vect.end();
     // while (cbegin != cend) {
