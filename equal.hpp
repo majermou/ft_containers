@@ -1,22 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   enable_if.hpp                                      :+:      :+:    :+:   */
+/*   equal.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/07 16:21:48 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/08 17:14:47 by majermou         ###   ########.fr       */
+/*   Created: 2021/10/08 17:11:55 by majermou          #+#    #+#             */
+/*   Updated: 2021/10/08 17:14:07 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ENABLE_IF_HPP
-#define ENABLE_IF_HPP
+#ifndef EQUAL_HPP
+#define EQUAL_HPP
 
-template<bool Cond, class T = void> struct enable_if {};
 
-template<class T> struct enable_if<true, T> {
-    typedef T type;
-};
 
-#endif // ENABLE_IF_HPP
+
+
+#endif // EQUAL_HPP

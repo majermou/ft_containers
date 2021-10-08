@@ -6,9 +6,12 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 16:21:44 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/07 18:24:19 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/08 17:16:09 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#ifndef IS_INTEGRAL_HPP
+#define IS_INTEGRAL_HPP
 
 #include <iostream>
 
@@ -28,3 +31,5 @@ template<> struct is_integral<unsigned short int>: public std::true_type {};
 template<> struct is_integral<unsigned int>: public std::true_type {};
 template<> struct is_integral<unsigned long int>: public std::true_type {};
 template<> struct is_integral<unsigned long long int>: public std::true_type {};
+
+#endif // IS_INTEGRAL_HPP
