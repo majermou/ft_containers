@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 17:16:22 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/07 20:01:38 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/08 16:51:27 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,6 @@ public:
             }
         }
         template <class InputIterator>
-        
         vector (InputIterator first, InputIterator last,
                 typename enable_if<!is_integral<InputIterator>::value, bool>::type = true): __capacity(last - first), __size(0) {
             __buff = __allocator.allocate(__capacity);
@@ -151,13 +150,13 @@ public:
             else if (n > __size) {
                 if (n > __capacity) {
                     __capacity = n;
-                    value_type* ptr = __allocator.alloc(__capacity);
+                    value_type* ptr = __allocator.allocate(__capacity);
                     for (size_type i = 0; i < __size; i++)
                         ptr[i] = __buff[i];
                     __allocator.deallocate(__buff, __capacity);
                     __buff = ptr;
                 }
-                for (__size; __size < n; ++__size)
+                for (; __size < n; ++__size)
                     __buff[__size] = val;
             }
         }
@@ -211,46 +210,147 @@ public:
             return __buff[__size - 1];
         }
 
+        template <class InputIterator>
+        void assign (InputIterator first, InputIterator last,
+                     typename enable_if<!is_integral<InputIterator>::value, bool>::type = true) {
+            size_type rangeLength = static_cast<size_type>(last - first);
+            __allocator.destroy(__buff);
+            if (rangeLength > __capacity) {
+                __capacity = rangeLength;
+                __allocator.deallocate(__buff, __capacity);
+                __buff = __allocator.allocate(__capacity);
+            }
+            for (__size = 0; __size < rangeLength; ++__size) { 
+                __buff[__size] = *first++;
+            }
+        }
+        void assign (size_type n, const value_type& val) {
+            __allocator.destroy(__buff);
+            if (n > __capacity) {
+                __capacity = n;
+                __allocator.deallocate(__buff, __capacity);
+                __buff = __allocator.allocate(__capacity);
+            }
+            for (__size = 0; __size < n; ++__size) {
+                __buff[__size] = val;
+            }
+        }
         void        push_back (const value_type& val)
         {
             if (__size + 1 >= __capacity)
                 reallocate();
             __buff[__size++] = val;
         }
-        
-        // assign need to be fixed...
-
-        // template <class InputIterator>
-        // void assign (InputIterator first, InputIterator last,
-        //             typename enable_if<!is_integral<InputIterator>::value, bool>::type = true) {
-        //     if (__capacity < static_cast<size_type>(last - first)) {
-        //         __capacity = last - first;
-        //         __allocator.deallocate(__buff, __capacity);
-        //         __buff = __allocator.allocate(__capacity);
-        //     }
-        //     for (difference_type i = 0; i < last - first; ++i) {
-        //         __buff[i++] = *first++;
-        //     }
-        //     __size = __capacity;
-        // }
-        // void assign (size_type n, const value_type& val) {
-        //     if (n > __capacity) {
-        //         __capacity = n;
-        //         __allocator.deallocate(__buff, __capacity);
-        //         __buff = __allocator.allocate(__capacity);
-        //     }
-        //     for (__size = 0; __size < n; ++__size) {
-        //         __buff[__size] = val;
-        //     }
-        // }
         void pop_back() {
             --__size;
         }
-
-        // insert
-        // erase
-        // swap
-
+        iterator insert (iterator position, const value_type& val) {
+            size_type dealloc = __capacity;
+            if (__size + 1 > __capacity) {
+                pointer tmp = __allocator.allocate(__size + 1);
+                iterator it = begin();
+                iterator ite = end();
+                __size = 0;
+                while (it < position)
+                    tmp[__size++] = *it++;
+                tmp[__size++] = val;
+                while (it < ite) {
+                    tmp[__size++] = *it++;
+                }
+                __allocator.deallocate(__buff, dealloc);
+                __buff = tmp;
+            } else {
+                value_type prev_val = val, tmp;
+                iterator it = position;
+                iterator ite = end();
+                while (it != ite) {
+                    tmp = *it;
+                    *it = prev_val;
+                    prev_val = tmp;
+                    it++;
+                }
+                __size += 1;
+            }
+            return begin();
+        }
+        void insert (iterator position, size_type n, const value_type& val) {
+            size_type dealloc = __capacity;
+            (__size + n > __capacity) ? __capacity = __size + n : __capacity;
+            pointer tmp = __allocator.allocate(__capacity);
+            iterator it = begin();
+            iterator ite = end();
+            __size = 0;
+            while (it < position) {
+                tmp[__size++] = *it++;
+            }
+            for (size_t i = 0; i < n; i++) {
+                tmp[__size++] = val;
+            }
+            while (it < ite) {
+                tmp[__size++] = *it++;
+            }
+            __allocator.deallocate(__buff, dealloc);
+            __buff = tmp;
+        }
+        template <class InputIterator>
+        void insert (iterator position, InputIterator first, InputIterator last,
+                    typename enable_if<!is_integral<InputIterator>::value, bool>::type = true) {
+            size_type dealloc = __capacity;
+            (__size + static_cast<size_type>(last - first) > __capacity) ? __capacity = __size + static_cast<size_type>(last - first) : __capacity;
+            pointer tmp = __allocator.allocate(__capacity);
+            iterator it = begin();
+            iterator ite = end();
+            __size = 0;
+            while (it < position) {
+                tmp[__size++] = *it++;
+            }
+            while (first != last) {
+                tmp[__size++] = *first++;
+            }
+            while (it < ite) {
+                tmp[__size++] = *it++;
+            }
+            __allocator.deallocate(__buff, dealloc);
+            __buff = tmp;
+        }
+        iterator erase (iterator position) {
+            iterator it = position;
+            iterator ite = end();
+            while (it + 1 != ite) {
+                *it = *(it + 1);
+                it++;
+            }
+            __size -= 1;
+            return position;
+        }
+        iterator erase (iterator first, iterator last) {
+            iterator ite = end();
+            __size -= static_cast<size_type>(last -first);
+            iterator it = first;
+            while (last != ite) {
+                *it++ = *last++; 
+            }
+            return first;
+        }
+        void swap (vector& x) {
+            value_type  tmp;
+            if (x.size() > __capacity) {
+                reserve(x.size());
+            }
+            if (__size > x.capacity()) {
+                x.reserve(__size);
+            }
+            size_type sz = size();
+            resize(x.size(), value_type());
+            x.resize(sz, value_type());
+            for (size_t i = 0; i < __size || i < x.size(); i++) {
+                tmp = x[i];
+                if (i < __size)
+                    x[i] = __buff[i];
+                if (i < x.size())
+                    __buff[i] = tmp;
+            }
+        }
         void clear() {
             __allocator.destroy(__buff);
             __size = 0;
@@ -259,6 +359,46 @@ public:
             return __allocator;
         }
 };  // vector class
+
+template <class T, class Alloc>
+bool operator== (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+
+template <class T, class Alloc>
+bool operator!= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+
+template <class T, class Alloc>
+bool operator<  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+
+template <class T, class Alloc>
+bool operator<= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+
+template <class T, class Alloc>
+bool operator>  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+
+template <class T, class Alloc>
+bool operator>= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+
+template<typename T, typename Alloc>
+void swap (vector<T,Alloc>& x, vector<T,Alloc>& y) {
+    T           val;
+    if (x.size() > y.capacity())
+        y.reserve(x.size());
+    if (y.size() > x.capacity())
+        x.reserve(y.size());
+    size_t      sz = y.size();
+    y.resize(x.size(), T());
+    x.resize(sz, T());
+    for (size_t i = 0; i < y.size() || i < x.size(); i++)
+    {
+        val = x[i];
+        if (i < x.size()) {
+            x[i] = y[i];
+        }
+        if (i < y.size()) {
+            y[i] = val;
+        }
+    }
+}
 }   // namespace ft
 
 template <typename _Iterator>
@@ -301,17 +441,17 @@ public:
         __normal_iterator   operator--(int) {
             return __normal_iterator(__current--);
         }
-        reference    operator[] (difference_type __n) const {
+        reference    operator[](difference_type __n) const {
             return __current[__n];
         }
-        __normal_iterator&    operator+= (difference_type __n) {
+        __normal_iterator&    operator+=(difference_type __n) {
             __current += __n;
             return *this;
         }
-        __normal_iterator     operator+ (difference_type __n) {
+        __normal_iterator     operator+(difference_type __n) {
             return __normal_iterator(__current + __n);
         }
-        __normal_iterator&    operator-= (difference_type __n) {
+        __normal_iterator&    operator-=(difference_type __n) {
             __current -= __n;
             return *this;
         }
