@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/10 17:48:35 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/11 12:59:31 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,16 @@ public:
   //
   //
   //
+  class value_compare : public std::binary_function<value_type, value_type, bool> {
+    friend class map;
+  protected:
+    key_compare   comp;
+    value_compare(key_compare c) : comp(c) {}
+  public:
+    bool operator()(const value_type& x, const value_type& y) const {
+      return comp(x.first, y.first);
+    }
+  };
 
 private:
 
