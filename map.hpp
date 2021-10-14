@@ -13,8 +13,9 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
-#include "make_pair.hpp"
+#include "bst.hpp"
 #include <iostream>
+#include "make_pair.hpp"
 
 namespace ft {
 template  <
@@ -48,12 +49,14 @@ public:
     key_compare   comp;
     value_compare(key_compare c) : comp(c) {}
   public:
+    value_compare() {}
     bool operator()(const value_type& x, const value_type& y) const {
       return comp(x.first, y.first);
     }
   };
 
 private:
+  Bst<key_type,mapped_type>   m_tree;
 
 public:
 
