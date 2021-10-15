@@ -13,17 +13,15 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
-#include "bst.hpp"
-#include <iostream>
+#include "avl.hpp"
 #include "make_pair.hpp"
+#include <iostream>
 
 namespace ft {
-template  <
-            typename Key,
+template  < typename Key,
             typename T,
             typename Compare = std::less<Key>,
-            typename Alloc = std::allocator<pair<const Key,T> >
-          >
+            typename Alloc = std::allocator<pair<const Key,T> > >
 class map {
 
 public:
@@ -56,9 +54,60 @@ public:
   };
 
 private:
-  Bst<key_type,mapped_type>   m_tree;
+
+  Avl<key_type,mapped_type>   m_Avl_tree;
 
 public:
+
+  // explicit  map(const key_compare& comp = key_compare(),
+  //               const allocator_type& alloc = allocator_type()) {
+  // }
+  // // template <class InputIterator>
+  // // map(InputIterator first, InputIterator last,
+  // //      const key_compare& comp = key_compare(),
+  // //      const allocator_type& alloc = allocator_type());
+  // // map (const map& x);
+  ~map() {
+
+  }
+  // // map& operator=(const map& x);
+
+  bool empty() const {
+    return m_Avl_tree.isEmpty();
+  }
+  size_type size() const {
+    return m_Avl_tree.m_size();
+  }
+  size_type max_size() const {
+    return m_Avl_tree.getMaxSize();
+  }
+  // mapped_type& operator[](const key_type& k) {
+  //   (*((this->insert(make_pair(k,mapped_type()))).first)).second;
+  // }
+  // pair<iterator,bool> insert (const value_type& val);
+  // iterator insert (iterator position, const value_type& val);
+  // template <class InputIterator>
+  //   void insert (InputIterator first, InputIterator last);
+
+  // void erase (iterator position);	
+  size_type erase (const key_type& k) {
+    m_Avl_tree.remove(make_pair(k, mapped_type()));
+    return 1;
+  }
+  // void erase (iterator first, iterator last);
+  // void swap (map& x);
+  void clear() {
+    m_Avl_tree.clear();
+  }
+  key_compare key_comp() const {
+    return key_compare();
+  }
+  value_compare value_comp() const {
+    return value_compare();
+  }
+  allocator_type get_allocator() const {
+    return allocator_type();
+  }
 
 };
 }
