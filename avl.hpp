@@ -88,6 +88,8 @@ private:
         AvlNode     *T2 = x->right;
         x->right = y;
         y->left = T2;
+        y->parent = x->parent;
+        x->parent = y;
         y->height = max(heightOf(y->left), heightOf(y->right)) + 1;
         x->height = max(heightOf(x->left), heightOf(x->right)) + 1;
         return x;
@@ -98,6 +100,8 @@ private:
         AvlNode     *T2 = y->left;
         y->left = x;
         x->right = T2;
+        y->parent = x->parent;
+        x->parent = y;
         x->height = max(heightOf(x->left), heightOf(x->right)) + 1;
         y->height = max(heightOf(y->left), heightOf(y->right)) + 1;
         return y;
@@ -153,7 +157,7 @@ private:
         } else if (m_comp(data, node->data)) {
             node->left = removeNode(node->left, data);
         } else if (m_comp(node->data, data)) {
-            node->right = removeNode(node->right, data);
+            node->right = (node->right, data);
         } else {
             if (!node->left || !node->right) {
                 AvlNode*    tmp = node->left ? node->left : node->right;
