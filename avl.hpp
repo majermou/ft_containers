@@ -1,103 +1,109 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   bst.hpp                                            :+:      :+:    :+:   */
+/*   avl.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/11 20:02:09 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/17 21:14:36 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef AVL_HPP
 #define AVL_HPP
 
-#include "pair.hpp"
 #include "make_pair.hpp"
 #include <iostream>
 
 template<typename T>
-struct Node
-{
-    T           data;
-    Node*       right;
-    Node*       left;
-    Node*       parent;
-    size_t      height;
-    Node(T _data, size_t _height):   data(_data),
-                                                    right(NULL),
-                                                    left(NULL),
-                                                    height(_height) {
-    }
-    void    setParentNode(Node* _parent) {
-        parent = _parent;
+struct Node {
+    typedef Node*           NodePtr;
+    typedef const Node*     Const_NodePtr;
+
+    T                   data;
+    NodePtr             right;
+    NodePtr             left;
+    NodePtr             parent;
+    size_t              height;
+    Node(T _data):data(_data),right(NULL),left(NULL),parent(NULL),height(1) {
     }
 };
 
-template  < typename Key,
-            typename T,
-            typename Compare = std::less<Key>,
-            typename Alloc = std::allocator<Node<pair<Key,T> > > >
-class Avl {
-
+template <  typename T,
+            typename Comp,
+            typename Alloc = std::allocator<Node<T> >
+         > class Avl {
 public:
-    typedef Key                                         key_type;
-    typedef T                                           mapped_type;
-    typedef pair<key_type,mapped_type>                  value_type;
-    typedef Compare                                     key_compare;
-    typedef Node<value_type>                            AvlNode;
-    typedef Alloc                                       allocator_type;
-    typedef typename allocator_type::size_type              size_type;
 
-    class value_compare {
-        key_compare   comp;
-        value_compare(key_compare c) : comp(c) {}
-    public:
-        value_compare(): comp() {}
-        bool operator()(const value_type& x, const value_type& y) const {
-            return comp(x.first, y.first);
-        }
-    };
+    typedef T                                       value_type;
+    typedef Alloc                                   allocator_type;
+    typedef typename Node<value_type>::NodePtr      AvlNode;
+    typedef size_t                                  size_type;
 
 private:
 
-    AvlNode*                m_root;
-    size_t                  m_size;
+    AvlNode                 m_root;
+    AvlNode                 m_end;
+    size_type               m_size;
     allocator_type          m_allocator;
-    value_compare           m_comp;
+    Comp                    m_comp;
 
-    size_t max(size_t a, size_t b) {
+    size_type max(size_type a, size_type b) {
         return (a > b) ? a : b;
     }
 
-    size_t  heightOf(AvlNode *node) {
-        if (!node)
-            return 0;
-        return node->height;
+    size_type  heightOf(AvlNode node) {
+        return (node == NULL) ? 0 : node->height;
     }
 
-    int     getBalanceFactor(AvlNode* node) {
-        if (!node)
-            return 0;
-        return heightOf(node->left) - heightOf(node->right);
+    int     getBalanceFactor(AvlNode node) {
+        return (node == NULL) ? 0 : heightOf(node->left) - heightOf(node->right);
     }
 
-    AvlNode*    rightRotate(AvlNode* y) {
-        AvlNode     *x = y->left;
-        AvlNode     *T2 = x->right;
+    AvlNode findMin(AvlNode node) const {
+        AvlNode current = node;
+
+        if (current != NULL) {
+            while (current->left) {
+                current = current->left;
+            }
+        }
+        return current;
+    }
+
+    AvlNode findMax(AvlNode node) const {
+        AvlNode current = node;
+        
+        if (current != NULL) {
+            while (current->right) {
+                current = current->right;
+            }
+        }
+        return current;
+    }
+    
+    AvlNode    rightRotate(AvlNode y) {
+        AvlNode     x = y->left;
+        AvlNode     T2 = x->right;
+
+        if(x->right != NULL)
+            x->right->parent = y;
         x->right = y;
         y->left = T2;
-        y->parent = x->parent;
-        x->parent = y;
+        x->parent = y->parent;
+        y->parent = x;
         y->height = max(heightOf(y->left), heightOf(y->right)) + 1;
         x->height = max(heightOf(x->left), heightOf(x->right)) + 1;
         return x;
     }
 
-    AvlNode*    leftRotate(AvlNode* x) {
-        AvlNode     *y = x->right;
-        AvlNode     *T2 = y->left;
+    AvlNode    leftRotate(AvlNode x) {
+        AvlNode     y = x->right;
+        AvlNode     T2 = y->left;
+
+        if(y->left != NULL)
+            y->left->parent = x;
         y->left = x;
         x->right = T2;
         y->parent = x->parent;
@@ -107,11 +113,11 @@ private:
         return y;
     }
 
-    AvlNode*    insertNode(AvlNode* node, const value_type data, AvlNode* parent = NULL) {
+    AvlNode    insertNode(AvlNode node, const value_type data, AvlNode parent = NULL) {
         if (!node) {
             node = m_allocator.allocate(sizeof(AvlNode));
-            m_allocator.construct(node, data, 1);
-            node->setParentNode(parent);
+            m_allocator.construct(node, data);
+            node->parent = parent;
             m_size += 1;
             return node;
         } else if (m_comp(data, node->data)) {
@@ -143,15 +149,7 @@ private:
         return node;
     }
 
-    AvlNode*    nodeWithMinVal(AvlNode* node) {
-        AvlNode*    current = node;
-        while (!current->left) {
-            current = current->left;
-        }
-        return current;
-    }
-
-    AvlNode*    removeNode(AvlNode* node, value_type data) {
+    AvlNode    removeNode(AvlNode node, value_type data) {
         if (!node) {
             return node;
         } else if (m_comp(data, node->data)) {
@@ -160,7 +158,7 @@ private:
             node->right = (node->right, data);
         } else {
             if (!node->left || !node->right) {
-                AvlNode*    tmp = node->left ? node->left : node->right;
+                AvlNode    tmp = node->left ? node->left : node->right;
                 if (!tmp) {
                     tmp = node;
                     node = NULL;
@@ -170,7 +168,7 @@ private:
                     m_size -= 1;
                 }
             } else {
-                AvlNode *tmp = nodeWithMinVal(node->right);
+                AvlNode tmp = nodeWithMinVal(node->right);
                 node->data = tmp->data;
                 node->right = removeNode(node->right, tmp->data);
             }
@@ -199,31 +197,31 @@ private:
         return node;
     }
 
-    AvlNode*    clearAvlTree(AvlNode* node) {
-        if (!node) {
+    // Empty the tree
+    void    makeEmpty(AvlNode node) {
+        if (node != NULL) {
+            makeEmpty(node->left);
+            makeEmpty(node->right);
+            m_allocator.deallocate(node, sizeof(AvlNode));
+        }
+        node = NULL; 
+    }
+
+    // Search for a value in the tree
+    AvlNode search(AvlNode node, const value_type val) {
+        if (node == NULL) {
             return NULL;
+        } else if (m_comp(val, node->data)) {
+            search(node->left, val);
+        } else if (m_comp(node->data, val)) {
+            search(node->right, val);
+        } else {
+            return node;
         }
-        clearAvlTree(node->left);
-        clearAvlTree(node->right);
-        m_allocator.deallocate(node, sizeof(AvlNode));
-        return NULL;
     }
 
-    AvlNode*    searchAvlTree(AvlNode* root, const value_type val) {
-        AvlNode*    current = root;
-        while (current) {
-            if (!m_comp(val, current->data) && !m_comp(current->data, val)) {
-                return current;
-            } else if (m_comp(val, root->data)) {
-                current = current->left;
-            } else {
-                current = current->right;
-            }
-        }
-        return NULL;
-    }
-
-    void    printAvlTree(AvlNode* node, std::string indent, bool last) {
+    // print the tree in a nice way //
+    void    printAvlTree(AvlNode node, std::string indent, bool last) {
         if (node) {
             std::cout << indent;
             if (last) {
@@ -240,40 +238,68 @@ private:
     }
 
 public:
-    Avl(): m_root(NULL), m_size(0) {}
+
+    Avl(): m_root(NULL), m_size(0) {
+        m_end = m_allocator.allocate(sizeof(AvlNode));
+        m_allocator.construct(m_end, value_type());
+        m_end->parent = NULL;
+    }
     ~Avl() {
-        clearAvlTree(m_root);
+        makeEmpty(m_root);
     }
 
     bool    isEmpty() const {
-        return ((!m_root) ? true : false);
+        return (m_root == NULL);
     }
     void    insert(value_type data) {
+        AvlNode endNode;
+        
+        if ((endNode = findMax(m_root))) {
+            endNode->parent->right = NULL;
+        }
         m_root = insertNode(m_root, data);
+        if ((endNode = findMax(m_root))) {
+            endNode->right = m_end;
+            m_end->parent = endNode;
+        }
     }
     void    remove(value_type val) {
+        AvlNode endNode;
+        
+        if ((endNode = findMax(m_root))) {
+            endNode->parent->right = NULL;
+        }
         m_root = removeNode(m_root, val);
-    }
-    mapped_type&    search(const key_type& key) {
-        AvlNode*    node = searchAvlTree(m_root, make_pair(key, mapped_type(0)));
-        if (node) {
-            return node->data.second;
-        } 
-        return mapped_type(0);
+        if ((endNode = findMax(m_root))) {
+            endNode->right = m_end;
+            m_end->parent = endNode;
+        }
     }
     void    clear() {
-        m_root = clearAvlTree(m_root);
+        AvlNode endNode;
+        
+        if ((endNode = findMax(m_root))) {
+            endNode->parent->right = NULL;
+        }
+        makeEmpty(m_root);
     }
-    void    print() {
-        printAvlTree(m_root,"",true);
-    }
-
     size_type   getSize() const {
         return m_size;
     }
-
     size_type   getMaxSize() const {
         return m_allocator.max_size();
+    }
+    AvlNode getEndNode() const {
+        return m_end;
+    }
+    AvlNode    getMinValNode() const {
+        return  findMin(m_root);
+    }
+    AvlNode    getMaxValNode() const {
+        return  findMax(m_root);
+    }
+    void    print() {
+        printAvlTree(m_root,"",true);
     }
 };
 
