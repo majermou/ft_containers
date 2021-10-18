@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/17 21:14:36 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/18 14:02:36 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,7 @@ private:
         } else if (m_comp(data, node->data)) {
             node->left = removeNode(node->left, data);
         } else if (m_comp(node->data, data)) {
-            node->right = (node->right, data);
+            node->right = removeNode(node->right, data);
         } else {
             if (!node->left || !node->right) {
                 AvlNode    tmp = node->left ? node->left : node->right;
@@ -168,7 +168,7 @@ private:
                     m_size -= 1;
                 }
             } else {
-                AvlNode tmp = nodeWithMinVal(node->right);
+                AvlNode tmp = findMin(node->right);
                 node->data = tmp->data;
                 node->right = removeNode(node->right, tmp->data);
             }
@@ -198,27 +198,26 @@ private:
     }
 
     // Empty the tree
-    void    makeEmpty(AvlNode node) {
+    AvlNode makeEmpty(AvlNode node) {
         if (node != NULL) {
             makeEmpty(node->left);
             makeEmpty(node->right);
             m_allocator.deallocate(node, sizeof(AvlNode));
         }
-        node = NULL; 
+        return NULL; 
     }
 
     // Search for a value in the tree
-    AvlNode search(AvlNode node, const value_type val) {
-        if (node == NULL) {
-            return NULL;
-        } else if (m_comp(val, node->data)) {
-            search(node->left, val);
-        } else if (m_comp(node->data, val)) {
-            search(node->right, val);
-        } else {
+    AvlNode searchAvlTree(AvlNode node, const value_type val) const
+    {
+        if (node == NULL || (!m_comp(val, node->data) && !m_comp(node->data, val))) {
             return node;
         }
-    }
+        if (m_comp(node->data, val)) {
+            return searchAvlTree(node->right, val);
+        }
+        return searchAvlTree(node->left, val);
+    }   
 
     // print the tree in a nice way //
     void    printAvlTree(AvlNode node, std::string indent, bool last) {
@@ -245,11 +244,11 @@ public:
         m_end->parent = NULL;
     }
     ~Avl() {
-        makeEmpty(m_root);
+        m_root = makeEmpty(m_root);
     }
 
     bool    isEmpty() const {
-        return (m_root == NULL);
+        return (m_size == 0);
     }
     void    insert(value_type data) {
         AvlNode endNode;
@@ -281,7 +280,8 @@ public:
         if ((endNode = findMax(m_root))) {
             endNode->parent->right = NULL;
         }
-        makeEmpty(m_root);
+        m_root = makeEmpty(m_root);
+        m_size = 0;
     }
     size_type   getSize() const {
         return m_size;
@@ -290,7 +290,7 @@ public:
         return m_allocator.max_size();
     }
     AvlNode getEndNode() const {
-        return m_end;
+        return (m_size == 0) ? NULL : m_end;
     }
     AvlNode    getMinValNode() const {
         return  findMin(m_root);
@@ -301,6 +301,10 @@ public:
     void    print() {
         printAvlTree(m_root,"",true);
     }
+    AvlNode search(value_type val) const {
+        return searchAvlTree(m_root, val);
+    }
+    
 };
 
 #endif // AVL_HPP

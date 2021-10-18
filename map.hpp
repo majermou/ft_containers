@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/17 21:30:39 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/18 14:11:53 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ public:
 
   typedef Key                                             key_type;
   typedef T                                               mapped_type;
-  typedef pair<const key_type,mapped_type>                value_type;
+  typedef pair<key_type,mapped_type>                      value_type;
   typedef Compare                                         key_compare;
   typedef Alloc                                           allocator_type;
   typedef typename allocator_type::reference              reference;
@@ -57,21 +57,42 @@ public:
 private:
 
   Avl<value_type,value_compare>   m_Avl_tree;
+  typedef typename Avl<value_type,value_compare>::AvlNode AvlNode;
+  typedef ft::map<key_type,mapped_type>   Self;
 
 public:
 
-  // explicit  map(const key_compare& comp = key_compare(),
-  //               const allocator_type& alloc = allocator_type()) {
-  // }
-  // // template <class InputIterator>
-  // // map(InputIterator first, InputIterator last,
-  // //      const key_compare& comp = key_compare(),
-  // //      const allocator_type& alloc = allocator_type());
-  // // map (const map& x);
-  // ~map() {
-
-  // }
-  // // map& operator=(const map& x);
+  explicit  map() {
+  }
+  template <class InputIterator>
+  map(InputIterator first, InputIterator last) {
+    while (first != last) {
+      m_Avl_tree.insert(make_pair(first->first,first->second));
+      first++;
+    }
+  }
+  map (const map& x) {
+    const_iterator first = x.begin();
+    const_iterator last = x.end();
+    while (first != last) {
+      m_Avl_tree.insert(make_pair(first->first,first->second));
+      first++;
+    }
+  }
+  ~map() {
+  }
+  map& operator=(const map& x) {
+    if (this != &x) {
+      clear();
+      const_iterator first = x.begin();
+      const_iterator last = x.end();
+      while (first != last) {
+        m_Avl_tree.insert(make_pair(first->first,first->second));
+        first++;
+      }
+    }
+    return *this;
+  }
 
   iterator begin() {
     return iterator(m_Avl_tree.getMinValNode());
@@ -98,9 +119,106 @@ public:
     return const_reverse_iterator(begin());
   }
 
-  void    insert(value_type data) {
-    m_Avl_tree.insert(data);
+  bool empty() const {
+    return m_Avl_tree.isEmpty();
   }
+  size_type size() const {
+    return m_Avl_tree.getSize();
+  }
+  size_type max_size() const {
+    return m_Avl_tree.getMaxSize();
+  }
+
+  mapped_type& operator[] (const key_type& k) {
+    return (*((insert(pr::make_pair(k,mapped_type()))).first)).second;
+  }
+  pair<iterator,bool> insert(const value_type& val) {
+    AvlNode node = m_Avl_tree.search(val);
+
+    if (node == NULL) {
+      m_Avl_tree.insert(val);
+      return pr::make_pair(iterator(m_Avl_tree.search(val)), true);
+    } else {
+      return pr::make_pair(iterator(node), false);
+    }
+  }
+  iterator insert(iterator position, const value_type& val) {
+    insert(val);
+    return position;
+    //need to be improved (effecient insertion with position)
+  }
+  template <class InputIterator>
+  void insert (InputIterator first, InputIterator last) {
+    while (first != last) {
+      insert(pr::make_pair(first->first,first->second));
+      first++;
+    }
+  }
+  void erase (iterator position) {
+    m_Avl_tree.remove(pr::make_pair(position->first,mapped_type()));
+  }
+  size_type erase (const key_type& k) {
+    AvlNode node = m_Avl_tree.search(pr::make_pair(k,mapped_type()));
+    if (node != NULL) {
+      m_Avl_tree.remove(pr::make_pair(k,mapped_type()));
+      return 1;
+    }
+    return 0;
+  }
+  void erase (iterator first, iterator last) {
+    while (first != last) {
+      m_Avl_tree.remove(pr::make_pair(first->first,mapped_type()));
+      first++;
+    }
+  }
+
+  //swap
+  void swap (map& x) {
+    Self  tree;
+
+    tree.insert(x.begin(), x.end());
+    x.clear();
+    x.insert(begin(), end());
+    clear();
+    insert(tree.begin(), tree.end());
+    tree.clear();
+  }
+
+  void clear() {
+    m_Avl_tree.clear();
+  }
+
+  key_compare key_comp() const {
+    return key_compare();
+  }
+  value_compare value_comp() const {
+    return value_compare();
+  }
+
+  iterator find(const key_type& k) {
+    return iterator(m_Avl_tree.search(pr::make_pair(k,mapped_type())));
+  }
+  const_iterator find(const key_type& k) const {
+    return const_iterator(m_Avl_tree.search(pr::make_pair(k,mapped_type())));
+  }
+  size_type count(const key_type& k) const {
+    AvlNode node = m_Avl_tree.search(pr::make_pair(k,mapped_type()));
+    
+    if (node == NULL) {
+      return 0;
+    }
+    return 1;
+  }
+  // iterator lower_bound (const key_type& k) {
+    
+  // }
+  // const_iterator lower_bound (const key_type& k) const {
+    
+  // }
+
+
+
+
   void    print() {
     m_Avl_tree.print();
   }
@@ -108,42 +226,10 @@ public:
 
 
 
-  // bool empty() const {
-  //   return m_Avl_tree.isEmpty();
-  // }
-  // size_type size() const {
-  //   return m_Avl_tree.m_size();
-  // }
-  // size_type max_size() const {
-  //   return m_Avl_tree.getMaxSize();
-  // }
-  // // mapped_type& operator[](const key_type& k) {
-  // //   (*((this->insert(make_pair(k,mapped_type()))).first)).second;
-  // // }
-  // // pair<iterator,bool> insert (const value_type& val);
-  // // iterator insert (iterator position, const value_type& val);
-  // // template <class InputIterator>
-  // //   void insert (InputIterator first, InputIterator last);
 
-  // // void erase (iterator position);	
-  // size_type erase (const key_type& k) {
-  //   m_Avl_tree.remove(make_pair(k, mapped_type()));
-  //   return 1;
-  // }
-  // // void erase (iterator first, iterator last);
-  // // void swap (map& x);
-  // void clear() {
-  //   m_Avl_tree.clear();
-  // }
-  // key_compare key_comp() const {
-  //   return key_compare();
-  // }
-  // value_compare value_comp() const {
-  //   return value_compare();
-  // }
-  // allocator_type get_allocator() const {
-  //   return allocator_type();
-  // }
+  allocator_type get_allocator() const {
+    return allocator_type();
+  }
 };
 }
 

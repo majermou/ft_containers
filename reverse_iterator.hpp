@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/16 13:48:17 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/17 19:47:08 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/18 12:28:57 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,11 +130,11 @@ inline  bool    operator>=(const ReverseIterator<iteratorL>& x, const ReverseIte
 }
 
 template<typename iterator>
-inline typename ReverseIterator<iterator>::difference_type operator-(const ReverseIterator<iterator>& x, const ReverseIterator<iterator>& y) {
+inline typename ReverseIterator<iterator>::difference_type  operator-(const ReverseIterator<iterator>& x, const ReverseIterator<iterator>& y) {
     return y.base() - x.base();
 }
 template<typename _IteratorL, typename _IteratorR>
-inline typename ReverseIterator<_IteratorL>::difference_type   operator-(const ReverseIterator<_IteratorL>& x, const ReverseIterator<_IteratorR>& y) {
+inline typename ReverseIterator<_IteratorL>::difference_type    operator-(const ReverseIterator<_IteratorL>& x, const ReverseIterator<_IteratorR>& y) {
     return y.base() - x.base();
 }
 

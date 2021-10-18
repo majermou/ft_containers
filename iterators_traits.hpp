@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/06 13:26:56 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/16 14:28:02 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/18 12:31:04 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <cstddef>
 #include <iostream>
 
-template<class Iterator>
+template<typename Iterator>
 struct iterators_traits {
     typedef typename Iterator::difference_type      difference_type;
     typedef typename Iterator::value_type           value_type;
@@ -25,7 +25,7 @@ struct iterators_traits {
     typedef typename Iterator::iterator_category    iterator_category;
 };
 
-template<class T>
+template<typename T>
 struct iterators_traits<T*> {
     typedef ptrdiff_t                           difference_type;
     typedef T                                   value_type;
@@ -34,7 +34,7 @@ struct iterators_traits<T*> {
     typedef std::random_access_iterator_tag     iterator_category;
 };
 
-template<class T>
+template<typename T>
 struct iterators_traits<const T*> {
     typedef ptrdiff_t                           difference_type;
     typedef T                                   value_type;
