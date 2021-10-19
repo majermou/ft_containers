@@ -6,14 +6,13 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/06 13:26:56 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/18 12:31:04 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/19 17:44:36 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ITERATOR_TRAITS_HPP 
 #define ITERATOR_TRAITS_HPP
 
-#include <cstddef>
 #include <iostream>
 
 template<typename Iterator>
