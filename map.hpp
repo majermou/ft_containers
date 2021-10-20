@@ -6,14 +6,14 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/18 14:11:53 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/20 12:31:15 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MAP_HPP
 #define MAP_HPP
 
-#include "avl.hpp"
+#include "avl_tree.hpp"
 #include "reverse_iterator.hpp"
 
 template<typename T> struct Iterator;
@@ -48,7 +48,6 @@ public:
     key_compare   comp;
     value_compare(key_compare c) : comp(c) {}
   public:
-    value_compare() {}
     bool operator()(const value_type& x, const value_type& y) const {
       return comp(x.first, y.first);
     }
@@ -56,26 +55,36 @@ public:
 
 private:
 
-  Avl<value_type,value_compare>   m_Avl_tree;
-  typedef typename Avl<value_type,value_compare>::AvlNode AvlNode;
-  typedef ft::map<key_type,mapped_type>   Self;
+  value_compare                                                 m_comp;
+  allocator_type                                                m_allocator;
+  Avl_tree<value_type,value_compare>                            m_Avl_tree;
+  typedef typename Avl_tree<value_type,value_compare>::AvlNode  AvlNode;
+  typedef ft::map<key_type,mapped_type>                         Self;
 
 public:
 
-  explicit  map() {
+  explicit  map(const key_compare& comp = key_compare(),
+                const allocator_type& alloc = allocator_type())
+                : m_comp(comp), m_allocator(alloc),
+                  m_Avl_tree(value_compare(m_comp)) {
   }
   template <class InputIterator>
-  map(InputIterator first, InputIterator last) {
+  map(InputIterator first, InputIterator last,
+      const key_compare& comp = key_compare(),
+      const allocator_type& alloc = allocator_type())
+      : m_comp(comp), m_allocator(alloc), 
+        m_Avl_tree(value_compare(comp)) {
     while (first != last) {
-      m_Avl_tree.insert(make_pair(first->first,first->second));
+      m_Avl_tree.insert(pr::make_pair(first->first,first->second));
       first++;
     }
   }
-  map (const map& x) {
+  map (const map& x): m_comp(x.m_comp), m_allocator(x.m_allocator),
+                      m_Avl_tree(value_compare(m_comp)) {
     const_iterator first = x.begin();
     const_iterator last = x.end();
     while (first != last) {
-      m_Avl_tree.insert(make_pair(first->first,first->second));
+      m_Avl_tree.insert(pr::make_pair(first->first,first->second));
       first++;
     }
   }
@@ -87,7 +96,7 @@ public:
       const_iterator first = x.begin();
       const_iterator last = x.end();
       while (first != last) {
-        m_Avl_tree.insert(make_pair(first->first,first->second));
+        m_Avl_tree.insert(pr::make_pair(first->first,first->second));
         first++;
       }
     }
@@ -174,14 +183,7 @@ public:
 
   //swap
   void swap (map& x) {
-    Self  tree;
-
-    tree.insert(x.begin(), x.end());
-    x.clear();
-    x.insert(begin(), end());
-    clear();
-    insert(tree.begin(), tree.end());
-    tree.clear();
+    m_Avl_tree.swap(x.m_Avl_tree);
   }
 
   void clear() {
@@ -192,7 +194,7 @@ public:
     return key_compare();
   }
   value_compare value_comp() const {
-    return value_compare();
+    return value_compare(m_comp);
   }
 
   iterator find(const key_type& k) {
@@ -217,16 +219,9 @@ public:
   // }
 
 
-
-
   void    print() {
     m_Avl_tree.print();
   }
-
-
-
-
-
   allocator_type get_allocator() const {
     return allocator_type();
   }

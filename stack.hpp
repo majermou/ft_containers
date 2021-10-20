@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:17:13 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/19 19:55:47 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/20 09:54:53 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,7 @@
 
 #include "vector.hpp"
 
-namespace ft
-{
+namespace ft {
 template <class T, class Container = ft::vector<T> >
 class stack {
 
@@ -26,9 +25,8 @@ public:
     typedef Container           container_type;
     typedef size_t              size_type;
 
-private:
+protected:
 
-    typedef stack<T,Container>      Self;
     container_type                  m_ctnr;
 
 public:

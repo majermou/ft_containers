@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 17:16:22 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/19 19:52:36 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/20 10:51:57 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,28 +65,26 @@ private:
 public:
 
     explicit vector(const allocator_type& alloc = allocator_type())
-                    : m_buff(NULL), m_capacity(0), m_size(0) {
-        static_cast<void>(alloc);
+                    : m_buff(NULL), m_capacity(0), m_size(0), m_allocator(alloc) {
     }
     explicit vector(size_type n, const value_type& val,
                     const allocator_type& alloc = allocator_type())
-                    : m_capacity(n), m_size(0) {
+                    : m_capacity(n), m_size(0), m_allocator(alloc) {
         m_buff = m_allocator.allocate(m_capacity);
         while (m_size < m_capacity) {
             m_buff[m_size++] = val;
         }
-        static_cast<void>(alloc);
     }
     template <class InputIterator>
-    vector (InputIterator first, InputIterator last,
+    vector(InputIterator first, InputIterator last,
             typename enable_if<!is_integral<InputIterator>::value, bool>::type = true,
-            const allocator_type& alloc = allocator_type()): m_capacity(last - first), m_size(0) {
+            const allocator_type& alloc = allocator_type())
+            : m_capacity(last - first), m_size(0), m_allocator(alloc) {
         m_buff = m_allocator.allocate(m_capacity);
         while (first != last)
             m_buff[m_size++] = *first++;
-        static_cast<void>(alloc);
     }
-    vector (const vector& x): m_capacity(x.size()), m_size(0) {
+    vector(const vector& x): m_capacity(x.size()), m_size(0), m_allocator(x.m_allocator) {
         m_buff = m_allocator.allocate(m_capacity);
         while (m_size < m_capacity) {
             m_buff[m_size] = x[m_size];

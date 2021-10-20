@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   avl.hpp                                            :+:      :+:    :+:   */
+/*   avl_tree.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/18 14:02:36 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/20 12:39:50 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "make_pair.hpp"
 #include <iostream>
+#include "map.hpp"
 
 template<typename T>
 struct Node {
@@ -32,14 +33,18 @@ struct Node {
 
 template <  typename T,
             typename Comp,
-            typename Alloc = std::allocator<Node<T> >
-         > class Avl {
+            typename Alloc = std::allocator< T >
+         > class Avl_tree {
+
+friend class map;
 public:
 
     typedef T                                       value_type;
-    typedef Alloc                                   allocator_type;
     typedef typename Node<value_type>::NodePtr      AvlNode;
     typedef size_t                                  size_type;
+    typedef Comp                                    value_compare;
+    typedef typename Alloc::template rebind< Node<T> >::other allocator_type;
+    
 
 private:
 
@@ -115,7 +120,7 @@ private:
 
     AvlNode    insertNode(AvlNode node, const value_type data, AvlNode parent = NULL) {
         if (!node) {
-            node = m_allocator.allocate(sizeof(AvlNode));
+            node = m_allocator.allocate(1);
             m_allocator.construct(node, data);
             node->parent = parent;
             m_size += 1;
@@ -164,7 +169,7 @@ private:
                     node = NULL;
                 } else {
                     *node = *tmp;
-                    m_allocator.deallocate(tmp, sizeof(AvlNode));
+                    m_allocator.deallocate(tmp, 1);
                     m_size -= 1;
                 }
             } else {
@@ -202,9 +207,9 @@ private:
         if (node != NULL) {
             makeEmpty(node->left);
             makeEmpty(node->right);
-            m_allocator.deallocate(node, sizeof(AvlNode));
+            m_allocator.deallocate(node, 1);
         }
-        return NULL; 
+        return NULL;
     }
 
     // Search for a value in the tree
@@ -238,12 +243,14 @@ private:
 
 public:
 
-    Avl(): m_root(NULL), m_size(0) {
-        m_end = m_allocator.allocate(sizeof(AvlNode));
+    Avl_tree(value_compare c): m_comp(c){
+        m_root = NULL;
+        m_size = 0;
+        m_end = m_allocator.allocate(1);
         m_allocator.construct(m_end, value_type());
         m_end->parent = NULL;
     }
-    ~Avl() {
+    ~Avl_tree() {
         m_root = makeEmpty(m_root);
     }
 
@@ -304,7 +311,20 @@ public:
     AvlNode search(value_type val) const {
         return searchAvlTree(m_root, val);
     }
-    
+
+    void    swap(Avl_tree& x) {
+        AvlNode     x_begin = x.m_root;
+        AvlNode     x_end = x.m_end;
+        size_type   x_size = x.m_size;
+
+        x.m_size = m_size;
+        m_size = x_size;
+        x.m_root = m_root;
+        x.m_end = m_end;
+        m_root = x_begin;
+        m_end = x_end;
+    }
+
 };
 
 #endif // AVL_HPP
