@@ -6,45 +6,85 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/20 12:39:50 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/20 19:43:29 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef AVL_HPP
 #define AVL_HPP
 
-#include "make_pair.hpp"
 #include <iostream>
-#include "map.hpp"
+#include "make_pair.hpp"
 
 template<typename T>
 struct Node {
     typedef Node*           NodePtr;
     typedef const Node*     Const_NodePtr;
+    typedef size_t          size_type;
 
-    T                   data;
-    NodePtr             right;
-    NodePtr             left;
-    NodePtr             parent;
-    size_t              height;
-    Node(T _data):data(_data),right(NULL),left(NULL),parent(NULL),height(1) {
+    T               data;
+    NodePtr         right;
+    NodePtr         left;
+    NodePtr         parent;
+    size_t          height;
+    Node(T _data):  data(_data),
+                    right(NULL),
+                    left(NULL),
+                    parent(NULL),
+                    height(1) {
     }
 };
 
-template <  typename T,
-            typename Comp,
-            typename Alloc = std::allocator< T >
-         > class Avl_tree {
+template<typename NodePtr>
+NodePtr  Avl_tree_increment(NodePtr x) {
+  if (x->right) {
+    x = x->right;
+    while (x->left) {
+      x = x->left;
+    }
+  } else {
+    NodePtr y = x->parent;
+    while (x == y->right) {
+      x = y;
+      y = y->parent;
+    }
+    if (x->right != y) {
+      x = y;
+    }
+  }
+  return x;
+}
 
-friend class map;
+template<typename NodePtr>
+NodePtr Avl_tree_decrement(NodePtr x) {
+  if (x->left) {
+    NodePtr y = x->left;
+    while (y->right) {
+      y = y->right;
+    }
+    x = y;
+  } else {
+    NodePtr y = x->parent;
+    while (x == y->left) {
+      x = y;
+      y = y->parent;
+    }
+    x = y;
+  }
+  return x;
+}
+
+template    <typename T,
+             typename Comp,
+             typename Alloc = std::allocator<T>
+            > class Avl_tree {
 public:
 
-    typedef T                                       value_type;
-    typedef typename Node<value_type>::NodePtr      AvlNode;
-    typedef size_t                                  size_type;
-    typedef Comp                                    value_compare;
-    typedef typename Alloc::template rebind< Node<T> >::other allocator_type;
-    
+    typedef T                                                   value_type;
+    typedef typename Node<value_type>::NodePtr                  AvlNode;
+    typedef size_t                                              size_type;
+    typedef Comp                                                value_compare;
+    typedef typename Alloc::template rebind<Node<T> >::other    allocator_type;
 
 private:
 
@@ -87,7 +127,7 @@ private:
         }
         return current;
     }
-    
+
     AvlNode    rightRotate(AvlNode y) {
         AvlNode     x = y->left;
         AvlNode     T2 = x->right;
@@ -154,7 +194,7 @@ private:
         return node;
     }
 
-    AvlNode    removeNode(AvlNode node, value_type data) {
+    AvlNode removeNode(AvlNode node, value_type data) {
         if (!node) {
             return node;
         } else if (m_comp(data, node->data)) {
@@ -163,15 +203,17 @@ private:
             node->right = removeNode(node->right, data);
         } else {
             if (!node->left || !node->right) {
-                AvlNode    tmp = node->left ? node->left : node->right;
+                AvlNode tmp = node->left ? node->left : node->right;
                 if (!tmp) {
                     tmp = node;
                     node = NULL;
                 } else {
-                    *node = *tmp;
-                    m_allocator.deallocate(tmp, 1);
-                    m_size -= 1;
+                    node->data = tmp->data;
+                    node->right = tmp->right;
+                    node->left = tmp->left;
                 }
+                m_allocator.deallocate(tmp, 1);
+                m_size -= 1;
             } else {
                 AvlNode tmp = findMin(node->right);
                 node->data = tmp->data;
@@ -182,7 +224,7 @@ private:
 
         // Update the balance factor of each node and
         // balance the tree
-        node->height = max(heightOf(node->left), heightOf(node->right));
+        node->height = 1 + max(heightOf(node->left), heightOf(node->right));
         int balanceFactor = getBalanceFactor(node);
         if (balanceFactor > 1) {
             if (getBalanceFactor(node->left) >= 0) {
@@ -202,7 +244,6 @@ private:
         return node;
     }
 
-    // Empty the tree
     AvlNode makeEmpty(AvlNode node) {
         if (node != NULL) {
             makeEmpty(node->left);
@@ -212,17 +253,33 @@ private:
         return NULL;
     }
 
-    // Search for a value in the tree
     AvlNode searchAvlTree(AvlNode node, const value_type val) const
     {
         if (node == NULL || (!m_comp(val, node->data) && !m_comp(node->data, val))) {
             return node;
+        } else if (m_comp(val, node->data)) {
+            return searchAvlTree(node->left, val);
         }
-        if (m_comp(node->data, val)) {
-            return searchAvlTree(node->right, val);
+        return searchAvlTree(node->right, val);
+    }
+
+    AvlNode lower_bound(AvlNode node, const value_type val) {
+        while (node && node != m_end) {
+            if (!m_comp(node->data, val))
+                return node;
+            node = Avl_tree_increment(node);
         }
-        return searchAvlTree(node->left, val);
-    }   
+        return m_end;
+    }
+
+    AvlNode upper_bound(AvlNode node, const value_type val) {
+        while (node && node != m_end) {
+            if (m_comp(val, node->data))
+                return node;
+            node = Avl_tree_increment(node);
+        }
+        return m_end;
+    }
 
     // print the tree in a nice way //
     void    printAvlTree(AvlNode node, std::string indent, bool last) {
@@ -243,20 +300,16 @@ private:
 
 public:
 
-    Avl_tree(value_compare c): m_comp(c){
+    Avl_tree(value_compare c): m_comp(c) {
         m_root = NULL;
         m_size = 0;
         m_end = m_allocator.allocate(1);
         m_allocator.construct(m_end, value_type());
-        m_end->parent = NULL;
     }
     ~Avl_tree() {
         m_root = makeEmpty(m_root);
     }
 
-    bool    isEmpty() const {
-        return (m_size == 0);
-    }
     void    insert(value_type data) {
         AvlNode endNode;
         
@@ -281,6 +334,9 @@ public:
             m_end->parent = endNode;
         }
     }
+    bool    isEmpty() const {
+        return (m_size == 0);
+    }
     void    clear() {
         AvlNode endNode;
         
@@ -300,18 +356,14 @@ public:
         return (m_size == 0) ? NULL : m_end;
     }
     AvlNode    getMinValNode() const {
-        return  findMin(m_root);
+        return findMin(m_root);
     }
     AvlNode    getMaxValNode() const {
-        return  findMax(m_root);
-    }
-    void    print() {
-        printAvlTree(m_root,"",true);
+        return findMax(m_root);
     }
     AvlNode search(value_type val) const {
         return searchAvlTree(m_root, val);
     }
-
     void    swap(Avl_tree& x) {
         AvlNode     x_begin = x.m_root;
         AvlNode     x_end = x.m_end;
@@ -324,7 +376,17 @@ public:
         m_root = x_begin;
         m_end = x_end;
     }
+    AvlNode getLower_bound(value_type val) {
+        return lower_bound(findMin(m_root), val);
+    }
+    AvlNode getUpper_bound(value_type val) {
+        return upper_bound(findMin(m_root), val);
+    }
 
+
+    void    print() {
+        printAvlTree(m_root,"",true);
+    }
 };
 
 #endif // AVL_HPP

@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 17:16:22 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/20 10:51:57 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/20 18:52:37 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,6 @@ public:
         }
     }
     ~vector () {
-        m_allocator.destroy(m_buff);
         m_allocator.deallocate(m_buff, m_capacity);
     }
     vector& operator= (const vector& x) {

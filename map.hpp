@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/20 12:31:15 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/20 19:42:04 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ private:
   allocator_type                                                m_allocator;
   Avl_tree<value_type,value_compare>                            m_Avl_tree;
   typedef typename Avl_tree<value_type,value_compare>::AvlNode  AvlNode;
-  typedef ft::map<key_type,mapped_type>                         Self;
 
 public:
 
@@ -75,7 +74,7 @@ public:
       : m_comp(comp), m_allocator(alloc), 
         m_Avl_tree(value_compare(comp)) {
     while (first != last) {
-      m_Avl_tree.insert(pr::make_pair(first->first,first->second));
+      m_Avl_tree.insert(ft::make_pair(first->first,first->second));
       first++;
     }
   }
@@ -84,7 +83,7 @@ public:
     const_iterator first = x.begin();
     const_iterator last = x.end();
     while (first != last) {
-      m_Avl_tree.insert(pr::make_pair(first->first,first->second));
+      m_Avl_tree.insert(ft::make_pair(first->first,first->second));
       first++;
     }
   }
@@ -96,7 +95,7 @@ public:
       const_iterator first = x.begin();
       const_iterator last = x.end();
       while (first != last) {
-        m_Avl_tree.insert(pr::make_pair(first->first,first->second));
+        m_Avl_tree.insert(ft::make_pair(first->first,first->second));
         first++;
       }
     }
@@ -139,132 +138,113 @@ public:
   }
 
   mapped_type& operator[] (const key_type& k) {
-    return (*((insert(pr::make_pair(k,mapped_type()))).first)).second;
+    return (*((insert(ft::make_pair(k,mapped_type()))).first)).second;
   }
   pair<iterator,bool> insert(const value_type& val) {
     AvlNode node = m_Avl_tree.search(val);
-
     if (node == NULL) {
       m_Avl_tree.insert(val);
-      return pr::make_pair(iterator(m_Avl_tree.search(val)), true);
+      return ft::make_pair(iterator(m_Avl_tree.search(val)), true);
     } else {
-      return pr::make_pair(iterator(node), false);
+      return ft::make_pair(iterator(node), false);
     }
   }
   iterator insert(iterator position, const value_type& val) {
-    insert(val);
-    return position;
-    //need to be improved (effecient insertion with position)
+    AvlNode node = m_Avl_tree.search(val);
+
+    if (node == NULL) {
+      insert(val);
+      node = m_Avl_tree.search(val);
+    }
+    position++;
+    return iterator(node);
   }
   template <class InputIterator>
   void insert (InputIterator first, InputIterator last) {
     while (first != last) {
-      insert(pr::make_pair(first->first,first->second));
+      insert(ft::make_pair(first->first,first->second));
       first++;
     }
   }
   void erase (iterator position) {
-    m_Avl_tree.remove(pr::make_pair(position->first,mapped_type()));
+    if (position != iterator(NULL)) {
+      m_Avl_tree.remove(ft::make_pair(position->first,position->second));
+    }
   }
   size_type erase (const key_type& k) {
-    AvlNode node = m_Avl_tree.search(pr::make_pair(k,mapped_type()));
+    AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
     if (node != NULL) {
-      m_Avl_tree.remove(pr::make_pair(k,mapped_type()));
+      m_Avl_tree.remove(ft::make_pair(k,mapped_type()));
       return 1;
     }
     return 0;
   }
   void erase (iterator first, iterator last) {
-    while (first != last) {
-      m_Avl_tree.remove(pr::make_pair(first->first,mapped_type()));
+    while (first != last && (first != iterator(NULL))) {
+      m_Avl_tree.remove(ft::make_pair(first->first,mapped_type()));
       first++;
     }
   }
-
-  //swap
   void swap (map& x) {
     m_Avl_tree.swap(x.m_Avl_tree);
   }
-
   void clear() {
     m_Avl_tree.clear();
   }
-
   key_compare key_comp() const {
     return key_compare();
   }
   value_compare value_comp() const {
     return value_compare(m_comp);
   }
-
   iterator find(const key_type& k) {
-    return iterator(m_Avl_tree.search(pr::make_pair(k,mapped_type())));
+    return iterator(m_Avl_tree.search(ft::make_pair(k,mapped_type())));
   }
   const_iterator find(const key_type& k) const {
-    return const_iterator(m_Avl_tree.search(pr::make_pair(k,mapped_type())));
+    return const_iterator(m_Avl_tree.search(ft::make_pair(k,mapped_type())));
   }
   size_type count(const key_type& k) const {
-    AvlNode node = m_Avl_tree.search(pr::make_pair(k,mapped_type()));
+    AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
     
     if (node == NULL) {
       return 0;
     }
     return 1;
   }
-  // iterator lower_bound (const key_type& k) {
-    
-  // }
-  // const_iterator lower_bound (const key_type& k) const {
-    
-  // }
+  iterator lower_bound(const key_type& k) {
+    return iterator(m_Avl_tree.getLower_bound(ft::make_pair(k,mapped_type())));
+  }
+  const_iterator lower_bound(const key_type& k) const {
+    return const_iterator(m_Avl_tree.getLower_bound(ft::make_pair(k,mapped_type())));
+  }
+  iterator upper_bound(const key_type& k) {
+    return iterator(m_Avl_tree.getUpper_bound(ft::make_pair(k,mapped_type())));
+  }
+  const_iterator upper_bound(const key_type& k) const {
+    return const_iterator(m_Avl_tree.getUpper_bound(ft::make_pair(k,mapped_type())));
+  }
+  ft::pair<const_iterator,const_iterator> equal_range (const key_type& k) const {
+    AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
 
+    if (node != NULL) {
+      return ft::make_pair(const_iterator(node), upper_bound(k));
+    }
+    return ft::make_pair(lower_bound(k), lower_bound(k));
+  }
+  ft::pair<iterator,iterator>             equal_range (const key_type& k) {
+    AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
 
-  void    print() {
-    m_Avl_tree.print();
+    if (node != NULL) {
+      return ft::make_pair(iterator(node), upper_bound(k));
+    }
+    return ft::make_pair(lower_bound(k), lower_bound(k));
   }
   allocator_type get_allocator() const {
     return allocator_type();
   }
+
+  void  print() { m_Avl_tree.print();}
 };
-}
-
-template<typename NodePtr>
-NodePtr  Avl_tree_increment(NodePtr x) {
-  if (x->right) {
-    x = x->right;
-    while (x->left) {
-      x = x->left;
-    }
-  } else {
-    NodePtr y = x->parent;
-    while (x == y->right) {
-      x = y;
-      y = y->parent;
-    }
-    if (x->right != y) {
-      x = y;
-    }
-  }
-  return x;
-}
-
-template<typename NodePtr>
-NodePtr Avl_tree_decrement(NodePtr x) {
-  if (x->left) {
-    NodePtr y = x->left;
-    while (y->right) {
-      y = y->right;
-    }
-    x = y;
-  } else {
-    NodePtr y = x->parent;
-    while (x == y->left) {
-      x = y;
-      y = y->parent;
-    }
-    x = y;
-  }
-  return x;
 }
 
 template<typename T>

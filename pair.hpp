@@ -6,13 +6,14 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/10 15:36:38 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/20 10:00:33 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/20 16:03:50 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PAIR_HPP
 #define PAIR_HPP
 
+namespace ft {
 template <typename T1, typename T2>
 struct pair {
     typedef T1      first_type;
@@ -30,5 +31,6 @@ struct pair {
         return *this;
     }
 };
+}
 
 #endif // PAIR_HPP
