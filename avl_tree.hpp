@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/20 19:43:29 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/21 13:11:36 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,15 +94,15 @@ private:
     allocator_type          m_allocator;
     Comp                    m_comp;
 
-    size_type max(size_type a, size_type b) {
+    size_type   max(size_type a, size_type b) {
         return (a > b) ? a : b;
     }
 
-    size_type  heightOf(AvlNode node) {
+    size_type   heightOf(AvlNode node) {
         return (node == NULL) ? 0 : node->height;
     }
 
-    int     getBalanceFactor(AvlNode node) {
+    int getBalanceFactor(AvlNode node) {
         return (node == NULL) ? 0 : heightOf(node->left) - heightOf(node->right);
     }
 
@@ -119,7 +119,7 @@ private:
 
     AvlNode findMax(AvlNode node) const {
         AvlNode current = node;
-        
+
         if (current != NULL) {
             while (current->right) {
                 current = current->right;
@@ -128,7 +128,7 @@ private:
         return current;
     }
 
-    AvlNode    rightRotate(AvlNode y) {
+    AvlNode rightRotate(AvlNode y) {
         AvlNode     x = y->left;
         AvlNode     T2 = x->right;
 
@@ -143,7 +143,7 @@ private:
         return x;
     }
 
-    AvlNode    leftRotate(AvlNode x) {
+    AvlNode leftRotate(AvlNode x) {
         AvlNode     y = x->right;
         AvlNode     T2 = y->left;
 
@@ -170,6 +170,8 @@ private:
         }
         else if (m_comp(node->data, data)) {
             node->right = insertNode(node->right, data, node);
+        } else {
+            return node;
         }
 
         // Update the balance factor of each node and
@@ -255,12 +257,14 @@ private:
 
     AvlNode searchAvlTree(AvlNode node, const value_type val) const
     {
-        if (node == NULL || (!m_comp(val, node->data) && !m_comp(node->data, val))) {
-            return node;
+        if (node == NULL) {
+            return NULL;
         } else if (m_comp(val, node->data)) {
             return searchAvlTree(node->left, val);
+        } else if (m_comp(node->data, val)) {
+            return searchAvlTree(node->right, val);
         }
-        return searchAvlTree(node->right, val);
+        return node;
     }
 
     AvlNode lower_bound(AvlNode node, const value_type val) {
@@ -305,6 +309,7 @@ public:
         m_size = 0;
         m_end = m_allocator.allocate(1);
         m_allocator.construct(m_end, value_type());
+        m_end->parent = NULL;
     }
     ~Avl_tree() {
         m_root = makeEmpty(m_root);
@@ -355,14 +360,19 @@ public:
     AvlNode getEndNode() const {
         return (m_size == 0) ? NULL : m_end;
     }
-    AvlNode    getMinValNode() const {
+    AvlNode getMinValNode() const {
         return findMin(m_root);
     }
-    AvlNode    getMaxValNode() const {
+    AvlNode getMaxValNode() const {
         return findMax(m_root);
     }
     AvlNode search(value_type val) const {
-        return searchAvlTree(m_root, val);
+        AvlNode node = searchAvlTree(m_root, val);
+
+        if (node == NULL || node == m_end) {
+            return m_end;
+        }
+        return node;
     }
     void    swap(Avl_tree& x) {
         AvlNode     x_begin = x.m_root;

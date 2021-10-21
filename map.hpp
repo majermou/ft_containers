@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/20 19:42:04 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/21 13:44:15 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "avl_tree.hpp"
 #include "reverse_iterator.hpp"
+#include "vector.hpp"
 
 template<typename T> struct Iterator;
 template<typename T> struct ConstIterator;
@@ -142,7 +143,8 @@ public:
   }
   pair<iterator,bool> insert(const value_type& val) {
     AvlNode node = m_Avl_tree.search(val);
-    if (node == NULL) {
+
+    if (!m_Avl_tree.getEndNode() || node == m_Avl_tree.getEndNode()) {
       m_Avl_tree.insert(val);
       return ft::make_pair(iterator(m_Avl_tree.search(val)), true);
     } else {
@@ -152,12 +154,11 @@ public:
   iterator insert(iterator position, const value_type& val) {
     AvlNode node = m_Avl_tree.search(val);
 
-    if (node == NULL) {
+    if (!m_Avl_tree.getEndNode() || node == m_Avl_tree.getEndNode()) {
       insert(val);
-      node = m_Avl_tree.search(val);
     }
+    return iterator(m_Avl_tree.search(val));
     position++;
-    return iterator(node);
   }
   template <class InputIterator>
   void insert (InputIterator first, InputIterator last) {
@@ -173,16 +174,24 @@ public:
   }
   size_type erase (const key_type& k) {
     AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
-    if (node != NULL) {
-      m_Avl_tree.remove(ft::make_pair(k,mapped_type()));
-      return 1;
+    
+    if (!m_Avl_tree.getEndNode() || node == m_Avl_tree.getEndNode()) {
+      return 0;
     }
-    return 0;
+    m_Avl_tree.remove(ft::make_pair(k,mapped_type()));
+    return 1;
   }
   void erase (iterator first, iterator last) {
-    while (first != last && (first != iterator(NULL))) {
-      m_Avl_tree.remove(ft::make_pair(first->first,mapped_type()));
+    ft::vector<value_type> elementsTodelete;
+    
+    while (first != last) {
+      elementsTodelete.push_back(ft::make_pair(first->first,first->second));
       first++;
+    }
+    while (elementsTodelete.size() > 0) {
+      
+      m_Avl_tree.remove(elementsTodelete.back());
+      elementsTodelete.pop_back();
     }
   }
   void swap (map& x) {
@@ -206,7 +215,7 @@ public:
   size_type count(const key_type& k) const {
     AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
     
-    if (node == NULL) {
+    if (!m_Avl_tree.getEndNode() || node == m_Avl_tree.getEndNode()) {
       return 0;
     }
     return 1;
@@ -226,18 +235,18 @@ public:
   ft::pair<const_iterator,const_iterator> equal_range (const key_type& k) const {
     AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
 
-    if (node != NULL) {
-      return ft::make_pair(const_iterator(node), upper_bound(k));
+    if (!m_Avl_tree.getEndNode() || node == m_Avl_tree.getEndNode()) {
+      return ft::make_pair(lower_bound(k), lower_bound(k));
     }
-    return ft::make_pair(lower_bound(k), lower_bound(k));
+    return ft::make_pair(const_iterator(node), upper_bound(k));
   }
   ft::pair<iterator,iterator>             equal_range (const key_type& k) {
     AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
 
-    if (node != NULL) {
-      return ft::make_pair(iterator(node), upper_bound(k));
+    if (!m_Avl_tree.getEndNode() || node == m_Avl_tree.getEndNode()) {
+      return ft::make_pair(lower_bound(k), lower_bound(k));
     }
-    return ft::make_pair(lower_bound(k), lower_bound(k));
+    return ft::make_pair(iterator(node), upper_bound(k));
   }
   allocator_type get_allocator() const {
     return allocator_type();

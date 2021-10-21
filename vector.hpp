@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 17:16:22 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/20 18:52:37 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/21 14:00:13 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,32 +238,19 @@ public:
     }
     iterator    insert(iterator position, const value_type& val) {
         size_type capacityTodealloc = m_capacity;
-        if (m_size + 1 > m_capacity) {
-            m_capacity = m_size + 1;
-            pointer tmp = m_allocator.allocate(m_capacity);
-            iterator it = begin();
-            iterator ite = end();
-            m_size = 0;
-            while (it < position)
-                tmp[m_size++] = *it++;
-            tmp[m_size++] = val;
-            while (it < ite) {
-                tmp[m_size++] = *it++;
-            }
-            m_allocator.deallocate(m_buff, capacityTodealloc);
-            m_buff = tmp;
-        } else {
-            value_type prev_val = val, tmp;
-            iterator it = position;
-            iterator ite = end();
-            while (it != ite) {
-                tmp = *it;
-                *it = prev_val;
-                prev_val = tmp;
-                it++;
-            }
-            m_size += 1;
+        m_capacity = (m_size + 1 > m_capacity) ? m_size + 1 : m_capacity;
+        pointer tmp = m_allocator.allocate(m_capacity);
+        iterator it = begin();
+        iterator ite = end();
+        m_size = 0;
+        while (it < position)
+            tmp[m_size++] = *it++;
+        tmp[m_size++] = val;
+        while (it < ite) {
+            tmp[m_size++] = *it++;
         }
+        m_allocator.deallocate(m_buff, capacityTodealloc);
+        m_buff = tmp;
         return begin();
     }
     void insert(iterator position, size_type n, const value_type& val) {
