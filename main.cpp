@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <deque>
-#if 0//CREATE A REAL STL EXAMPLE
+#if 1//CREATE A REAL STL EXAMPLE
 	#include <map>
 	#include <stack>
 	#include <vector>
@@ -21,7 +21,6 @@ struct Buffer
 	int idx;
 	char buff[BUFFER_SIZE];
 };
-
 
 #define COUNT (MAX_RAM / (int)sizeof(Buffer))
 
@@ -59,7 +58,6 @@ int main(int argc, char** argv) {
 	ft::vector<int> vector_int;
 	ft::stack<int> stack_int;
 	ft::vector<Buffer> vector_buffer;
-	// ft::stack<Buffer, std::deque<int> > stack_deq_buffer;
 	ft::map<int, int> map_int;
 
 	for (int i = 0; i < COUNT; i++)
@@ -85,11 +83,12 @@ int main(int argc, char** argv) {
 	}
 	catch(const std::exception& e)
 	{
-		//NORMAL ! :P
+		std::cout << e.what() << std::endl;
 	}
 	
 	for (int i = 0; i < COUNT; ++i)
 	{
+		map_int.insert(ft::make_pair(i, rand()));
 		map_int.insert(ft::make_pair(rand(), rand()));
 	}
 
@@ -100,9 +99,24 @@ int main(int argc, char** argv) {
 		sum += map_int[access];
 	}
 	std::cout << "should be constant with the same seed: " << sum << std::endl;
+	ft::map<int,int>::iterator found = map_int.find(1337);
+	if (found != map_int.end())
+		std::cout << found->first << "-->" << found->second << std::endl;
+	
 
 	{
+		ft::map<int, int> copyconstruct(map_int);
 		ft::map<int, int> copy = map_int;
+		std::cout << "map.size() is " << map_int.size() << '\n';
+		ft::map<int, int>::iterator it = copy.begin();
+		ft::map<int, int>::const_iterator ite = copy.end();
+		while (it != ite) {
+			std::cout << it->first << "-->" << it->second << std::endl;
+			it++;
+		}
+		copy.erase(copy.begin(),copy.end());
+		std::cout << "map.size() is " << map_int.size() << '\n';
+
 	}
 	MutantStack<char> iterable_stack;
 	for (char letter = 'a'; letter <= 'z'; letter++)
@@ -112,5 +126,12 @@ int main(int argc, char** argv) {
 		std::cout << *it;
 	}
 	std::cout << std::endl;
+	std::cout << "size =  " << iterable_stack.size() << '\n';
+	while (!iterable_stack.empty()) {
+		std::cout << iterable_stack.top();
+		iterable_stack.pop();
+	}
+	std::cout << std::endl;
+	std::cout << "size =  " << iterable_stack.size() << '\n';
 	return (0);
 }
