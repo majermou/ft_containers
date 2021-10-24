@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <deque>
+#include <algorithm>
 #if 0//CREATE A REAL STL EXAMPLE
 	#include <map>
 	#include <stack>
@@ -110,6 +111,8 @@ int main(int argc, char** argv) {
 		std::cout << "map.size() is " << map_int.size() << '\n';
 		ft::map<int, int>::iterator it = copy.begin();
 		ft::map<int, int>::const_iterator ite = copy.end();
+		std::cout << "min element is : " << std::min_element(copy.begin(), copy.end())->first << "==>" << std::min_element(copy.begin(), copy.end())->second << std::endl;
+		std::cout << "min element is : " << std::max_element(copy.begin(), copy.end())->first << "==>" << std::max_element(copy.begin(), copy.end())->second << std::endl;
 		while (it != ite) {
 			std::cout << it->first << "-->" << it->second << std::endl;
 			it++;

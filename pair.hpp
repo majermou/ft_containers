@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/10 15:36:38 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/20 16:03:50 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/24 11:31:14 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,46 @@ struct pair {
         second = pr.second;
         return *this;
     }
+
+    template <class U1, class U2>
+    friend bool operator==(const pair<U1,U2>& lhs, const pair<U1,U2>& rhs);
+    template <class U1, class U2>
+    friend bool operator!=(const pair<U1,U2>& lhs, const pair<U1,U2>& rhs);
+    template <class U1, class U2>
+    friend bool operator<(const pair<U1,U2>& lhs, const pair<U1,U2>& rhs);
+    template <class U1, class U2>
+    friend bool operator<=(const pair<U1,U2>& lhs, const pair<U1,U2>& rhs);
+    template <class U1, class U2>
+    friend bool operator>(const pair<U1,U2>& lhs, const pair<U1,U2>& rhs);
+    template <class U1, class U2>
+    friend bool operator>=(const pair<U1,U2>& lhs, const pair<U1,U2>& rhs);
 };
+
+template <class T1, class T2>
+bool operator==(const pair<T1,T2>& lhs, const pair<T1,T2>& rhs) {
+    return lhs.first == rhs.first && lhs.second == rhs.second;
+}
+template <class T1, class T2>
+bool operator!=(const pair<T1,T2>& lhs, const pair<T1,T2>& rhs) {
+    return !(lhs == rhs);
+}
+template <class T1, class T2>
+bool operator<(const pair<T1,T2>& lhs, const pair<T1,T2>& rhs) {
+    return lhs.first < rhs.first || (!(rhs.first < lhs.first) && lhs.second < rhs.second);
+}
+template <class T1, class T2>
+bool operator<=(const pair<T1,T2>& lhs, const pair<T1,T2>& rhs) {
+    return !(rhs < lhs);
+}	
+template <class T1, class T2>
+bool operator>(const pair<T1,T2>& lhs, const pair<T1,T2>& rhs) {
+    return rhs < lhs;
+}
+template <class T1, class T2>
+bool operator>=(const pair<T1,T2>& lhs, const pair<T1,T2>& rhs) {
+    return !(lhs < rhs);
+}
+
 }
 
 #endif // PAIR_HPP
