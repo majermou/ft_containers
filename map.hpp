@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/24 10:56:01 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/24 11:02:17 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,7 +252,6 @@ public:
     return allocator_type();
   }
 
-  void  print() { m_Avl_tree.print();}
 };
 }
 

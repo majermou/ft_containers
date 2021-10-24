@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/24 10:51:25 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/24 11:02:03 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,56 +253,6 @@ private:
         return node;
     }
 
-    //     AvlNode removeNode(AvlNode node, value_type data) {
-    //     if (!node) {
-    //         return node;
-    //     } else if (m_comp(data, node->data)) {
-    //         node->left = removeNode(node->left, data);
-    //     } else if (m_comp(node->data, data)) {
-    //         node->right = removeNode(node->right, data);
-    //     } else {
-    //         if (!node->left || !node->right) {
-    //             AvlNode tmp = node->left ? node->left : node->right;
-    //             if (!tmp) {
-    //                 tmp = node;
-    //                 node = NULL;
-    //             } else {
-    //                 node->data = tmp->data;
-    //                 node->right = tmp->right;
-    //                 node->left = tmp->left;
-    //             }
-    //             m_allocator.deallocate(tmp, 1);
-    //             m_size -= 1;
-    //         } else {
-    //             AvlNode tmp = findMin(node->right);
-    //             node->data = tmp->data;
-    //             node->right = removeNode(node->right, tmp->data);
-    //         }
-    //     }
-    //     if (!node) return node;
-
-    //     // Update the balance factor of each node and
-    //     // balance the tree
-    //     node->height = 1 + max(heightOf(node->left), heightOf(node->right));
-    //     int balanceFactor = getBalanceFactor(node);
-    //     if (balanceFactor > 1) {
-    //         if (getBalanceFactor(node->left) >= 0) {
-    //             return rightRotate(node);
-    //         } else {
-    //             node->left = leftRotate(node->left);
-    //             return rightRotate(node);
-    //         }
-    //     } else if (balanceFactor < -1) {
-    //         if (getBalanceFactor(node->right) <= 0) {
-    //             return leftRotate(node);
-    //         } else {
-    //             node->right = rightRotate(node->right);
-    //             return leftRotate(node);
-    //         }
-    //     }
-    //     return node;
-    // }
-
     AvlNode makeEmpty(AvlNode node) {
         if (node != NULL) {
             makeEmpty(node->left);
@@ -340,23 +290,6 @@ private:
             node = Avl_tree_increment(node);
         }
         return m_end;
-    }
-
-    // print the tree in a nice way //
-    void    printAvlTree(AvlNode node, std::string indent, bool last) {
-        if (node) {
-            std::cout << indent;
-            if (last) {
-                std::cout << "R----";
-                indent += "   ";
-            } else {
-                std::cout << "L----";
-                indent += "|  ";
-            }
-            std::cout << node->data.first << std::endl;
-            printAvlTree(node->left, indent, false);
-            printAvlTree(node->right, indent, true);
-        }
     }
 
 public:
@@ -448,11 +381,6 @@ public:
     }
     AvlNode getUpper_bound(value_type val) {
         return upper_bound(findMin(m_root), val);
-    }
-
-
-    void    print() {
-        printAvlTree(m_root,"",true);
     }
 };
 
