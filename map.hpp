@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/21 13:44:15 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/24 10:56:01 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ public:
 
   typedef Key                                             key_type;
   typedef T                                               mapped_type;
-  typedef pair<key_type,mapped_type>                      value_type;
+  typedef pair<const key_type,mapped_type>                value_type;
   typedef Compare                                         key_compare;
   typedef Alloc                                           allocator_type;
   typedef typename allocator_type::reference              reference;
@@ -182,8 +182,8 @@ public:
     return 1;
   }
   void erase (iterator first, iterator last) {
-    ft::vector<value_type> elementsTodelete;
-    
+    ft::vector<ft::pair<key_type,mapped_type> > elementsTodelete;
+
     while (first != last) {
       elementsTodelete.push_back(ft::make_pair(first->first,first->second));
       first++;

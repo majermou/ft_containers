@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/21 13:11:36 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/24 10:51:25 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ private:
     AvlNode                 m_end;
     size_type               m_size;
     allocator_type          m_allocator;
-    Comp                    m_comp;
+    value_compare           m_comp;
 
     size_type   max(size_type a, size_type b) {
         return (a > b) ? a : b;
@@ -129,15 +129,14 @@ private:
     }
 
     AvlNode rightRotate(AvlNode y) {
-        AvlNode     x = y->left;
-        AvlNode     T2 = x->right;
+        AvlNode		x = y->left;
 
         if(x->right != NULL)
             x->right->parent = y;
-        x->right = y;
-        y->left = T2;
-        x->parent = y->parent;
-        y->parent = x;
+		x->parent = y->parent;
+		y->parent = x;
+        y->left = x->right;
+		x->right = y;
         y->height = max(heightOf(y->left), heightOf(y->right)) + 1;
         x->height = max(heightOf(x->left), heightOf(x->right)) + 1;
         return x;
@@ -145,20 +144,19 @@ private:
 
     AvlNode leftRotate(AvlNode x) {
         AvlNode     y = x->right;
-        AvlNode     T2 = y->left;
 
         if(y->left != NULL)
             y->left->parent = x;
-        y->left = x;
-        x->right = T2;
         y->parent = x->parent;
-        x->parent = y;
+		x->parent = y;
+		x->right = y->left;
+		y->left = x;
         x->height = max(heightOf(x->left), heightOf(x->right)) + 1;
         y->height = max(heightOf(y->left), heightOf(y->right)) + 1;
         return y;
     }
 
-    AvlNode    insertNode(AvlNode node, const value_type data, AvlNode parent = NULL) {
+    AvlNode insertNode(AvlNode node, const value_type data, AvlNode parent = NULL) {
         if (!node) {
             node = m_allocator.allocate(1);
             m_allocator.construct(node, data);
@@ -181,14 +179,14 @@ private:
         if (balanceFactor > 1) {
             if (m_comp(data, node->left->data)) {
                 return rightRotate(node);
-            } else if (m_comp(node->left->data, data)) {
+            } else {
                 node->left = leftRotate(node->left);
                 return rightRotate(node);
             }
         } else if (balanceFactor < -1) {
             if (m_comp(node->right->data, data)) {
                 return leftRotate(node);
-            } else if (m_comp(data, node->right->data)) {
+            } else {
                 node->right = rightRotate(node->right);
                 return leftRotate(node);
             }
@@ -210,15 +208,24 @@ private:
                     tmp = node;
                     node = NULL;
                 } else {
-                    node->data = tmp->data;
-                    node->right = tmp->right;
-                    node->left = tmp->left;
+                    AvlNode temp = node;
+                    tmp->parent = node->parent;
+                    node = tmp;
+                    tmp = temp;
                 }
                 m_allocator.deallocate(tmp, 1);
                 m_size -= 1;
             } else {
                 AvlNode tmp = findMin(node->right);
-                node->data = tmp->data;
+                AvlNode newNode = m_allocator.allocate(1);
+                m_allocator.construct(newNode, tmp->data);
+                newNode->parent = node->parent;
+                newNode->right = node->right;
+                newNode->left = node->left;
+                node->right->parent = newNode;
+                node->left->parent = newNode;
+                m_allocator.deallocate(node, 1);
+                node = newNode;
                 node->right = removeNode(node->right, tmp->data);
             }
         }
@@ -245,6 +252,56 @@ private:
         }
         return node;
     }
+
+    //     AvlNode removeNode(AvlNode node, value_type data) {
+    //     if (!node) {
+    //         return node;
+    //     } else if (m_comp(data, node->data)) {
+    //         node->left = removeNode(node->left, data);
+    //     } else if (m_comp(node->data, data)) {
+    //         node->right = removeNode(node->right, data);
+    //     } else {
+    //         if (!node->left || !node->right) {
+    //             AvlNode tmp = node->left ? node->left : node->right;
+    //             if (!tmp) {
+    //                 tmp = node;
+    //                 node = NULL;
+    //             } else {
+    //                 node->data = tmp->data;
+    //                 node->right = tmp->right;
+    //                 node->left = tmp->left;
+    //             }
+    //             m_allocator.deallocate(tmp, 1);
+    //             m_size -= 1;
+    //         } else {
+    //             AvlNode tmp = findMin(node->right);
+    //             node->data = tmp->data;
+    //             node->right = removeNode(node->right, tmp->data);
+    //         }
+    //     }
+    //     if (!node) return node;
+
+    //     // Update the balance factor of each node and
+    //     // balance the tree
+    //     node->height = 1 + max(heightOf(node->left), heightOf(node->right));
+    //     int balanceFactor = getBalanceFactor(node);
+    //     if (balanceFactor > 1) {
+    //         if (getBalanceFactor(node->left) >= 0) {
+    //             return rightRotate(node);
+    //         } else {
+    //             node->left = leftRotate(node->left);
+    //             return rightRotate(node);
+    //         }
+    //     } else if (balanceFactor < -1) {
+    //         if (getBalanceFactor(node->right) <= 0) {
+    //             return leftRotate(node);
+    //         } else {
+    //             node->right = rightRotate(node->right);
+    //             return leftRotate(node);
+    //         }
+    //     }
+    //     return node;
+    // }
 
     AvlNode makeEmpty(AvlNode node) {
         if (node != NULL) {

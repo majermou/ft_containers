@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <deque>
-#if 1//CREATE A REAL STL EXAMPLE
+#if 0//CREATE A REAL STL EXAMPLE
 	#include <map>
 	#include <stack>
 	#include <vector>
@@ -114,8 +114,8 @@ int main(int argc, char** argv) {
 			std::cout << it->first << "-->" << it->second << std::endl;
 			it++;
 		}
-		copy.erase(copy.begin(),copy.end());
 		std::cout << "map.size() is " << map_int.size() << '\n';
+		copy.erase(copy.begin(),copy.end());
 
 	}
 	MutantStack<char> iterable_stack;
