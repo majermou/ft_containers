@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 17:16:22 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/21 14:00:13 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/27 13:02:35 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,6 @@ public:
 
 private:
 
-        typedef ft::vector<value_type>      Self;
-
         pointer             m_buff;
         size_type           m_capacity;
         size_type           m_size;
@@ -65,7 +63,7 @@ private:
 public:
 
     explicit vector(const allocator_type& alloc = allocator_type())
-                    : m_buff(NULL), m_capacity(0), m_size(0), m_allocator(alloc) {
+                    : m_buff(NULL),m_capacity(0),m_size(0),m_allocator(alloc) {
     }
     explicit vector(size_type n, const value_type& val,
                     const allocator_type& alloc = allocator_type())
@@ -79,7 +77,7 @@ public:
     vector(InputIterator first, InputIterator last,
             typename enable_if<!is_integral<InputIterator>::value, bool>::type = true,
             const allocator_type& alloc = allocator_type())
-            : m_capacity(last - first), m_size(0), m_allocator(alloc) {
+            : m_capacity(static_cast<size_type>(last - first)), m_size(0), m_allocator(alloc) {
         m_buff = m_allocator.allocate(m_capacity);
         while (first != last)
             m_buff[m_size++] = *first++;
@@ -91,10 +89,11 @@ public:
             ++m_size;
         }
     }
-    ~vector () {
+    ~vector() {
+        clear();
         m_allocator.deallocate(m_buff, m_capacity);
     }
-    vector& operator= (const vector& x) {
+    vector& operator=(const vector& x) {
         if (m_capacity < x.size()) {
             m_allocator.deallocate(m_buff, m_capacity);
             m_capacity = x.size();
@@ -206,34 +205,34 @@ public:
     void assign(InputIterator first, InputIterator last,
                 typename enable_if<!is_integral<InputIterator>::value, bool>::type = true) {
         size_type rangeLength = static_cast<size_type>(last - first);
-        m_allocator.destroy(m_buff);
+        clear();
         if (rangeLength > m_capacity) {
             m_allocator.deallocate(m_buff, m_capacity);
             m_buff = m_allocator.allocate(rangeLength);
             m_capacity = rangeLength;
         }
-        for (m_size = 0; m_size < rangeLength; ++m_size) { 
-            m_buff[m_size] = *first++;
+        while (m_size < rangeLength) { 
+            m_buff[m_size++] = *first++;
         }
     }
     void assign(size_type n, const value_type& val) {
-        m_allocator.destroy(m_buff);
+        clear();
         if (n > m_capacity) {
             m_allocator.deallocate(m_buff, m_capacity);
             m_buff = m_allocator.allocate(n);
             m_capacity = n;
         }
-        for (m_size = 0; m_size < n; ++m_size) {
-            m_buff[m_size] = val;
+        while (m_size < n) {
+            m_buff[m_size++] = val;
         }
     }
-    void    push_back(const value_type& val)
-    {
+    void    push_back(const value_type& val) {
         if (m_size + 1 > m_capacity)
             reallocate();
         m_buff[m_size++] = val;
     }
     void pop_back() {
+        m_allocator.destroy(&m_buff[m_size - 1]);
         --m_size;
     }
     iterator    insert(iterator position, const value_type& val) {
@@ -245,13 +244,14 @@ public:
         m_size = 0;
         while (it < position)
             tmp[m_size++] = *it++;
+        iterator ret = iterator(tmp + m_size);
         tmp[m_size++] = val;
         while (it < ite) {
             tmp[m_size++] = *it++;
         }
         m_allocator.deallocate(m_buff, capacityTodealloc);
         m_buff = tmp;
-        return begin();
+        return ret;
     }
     void insert(iterator position, size_type n, const value_type& val) {
         size_type capacityTodealloc = m_capacity;
@@ -325,7 +325,9 @@ public:
         m_buff = tmp;
     }
     void clear() {
-        m_allocator.destroy(m_buff);
+        for (size_t i = 0; i < m_size; i++) {
+            m_allocator.destroy(&(m_buff[i]));
+        }
         m_size = 0;
     }
     allocator_type get_allocator() const {

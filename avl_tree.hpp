@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/24 11:02:03 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/27 17:18:09 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ struct Node {
     NodePtr         right;
     NodePtr         left;
     NodePtr         parent;
-    size_t          height;
+    size_type       height;
     Node(T _data):  data(_data),
                     right(NULL),
                     left(NULL),
@@ -74,15 +74,15 @@ NodePtr Avl_tree_decrement(NodePtr x) {
   return x;
 }
 
-template    <typename T,
-             typename Comp,
-             typename Alloc = std::allocator<T>
-            > class Avl_tree {
+template <  typename T,
+            typename Comp,
+            typename Alloc = std::allocator<T>
+         > class Avl_tree {
 public:
 
     typedef T                                                   value_type;
     typedef typename Node<value_type>::NodePtr                  AvlNode;
-    typedef size_t                                              size_type;
+    typedef typename Node<value_type>::size_type                size_type;
     typedef Comp                                                value_compare;
     typedef typename Alloc::template rebind<Node<T> >::other    allocator_type;
 
@@ -274,70 +274,31 @@ private:
         return node;
     }
 
-    AvlNode lower_bound(AvlNode node, const value_type val) {
-        while (node && node != m_end) {
-            if (!m_comp(node->data, val))
-                return node;
-            node = Avl_tree_increment(node);
-        }
-        return m_end;
-    }
-
-    AvlNode upper_bound(AvlNode node, const value_type val) {
-        while (node && node != m_end) {
-            if (m_comp(val, node->data))
-                return node;
-            node = Avl_tree_increment(node);
-        }
-        return m_end;
-    }
-
 public:
 
     Avl_tree(value_compare c): m_comp(c) {
         m_root = NULL;
         m_size = 0;
         m_end = m_allocator.allocate(1);
-        m_allocator.construct(m_end, value_type());
         m_end->parent = NULL;
+        m_end->left = m_root;
     }
     ~Avl_tree() {
         m_root = makeEmpty(m_root);
+        m_allocator.deallocate(m_end,1);
     }
 
     void    insert(value_type data) {
-        AvlNode endNode;
-        
-        if ((endNode = findMax(m_root))) {
-            endNode->parent->right = NULL;
-        }
         m_root = insertNode(m_root, data);
-        if ((endNode = findMax(m_root))) {
-            endNode->right = m_end;
-            m_end->parent = endNode;
-        }
+        m_root->parent = m_end;
     }
     void    remove(value_type val) {
-        AvlNode endNode;
-        
-        if ((endNode = findMax(m_root))) {
-            endNode->parent->right = NULL;
-        }
         m_root = removeNode(m_root, val);
-        if ((endNode = findMax(m_root))) {
-            endNode->right = m_end;
-            m_end->parent = endNode;
-        }
     }
     bool    isEmpty() const {
         return (m_size == 0);
     }
     void    clear() {
-        AvlNode endNode;
-        
-        if ((endNode = findMax(m_root))) {
-            endNode->parent->right = NULL;
-        }
         m_root = makeEmpty(m_root);
         m_size = 0;
     }
@@ -358,10 +319,8 @@ public:
     }
     AvlNode search(value_type val) const {
         AvlNode node = searchAvlTree(m_root, val);
-
-        if (node == NULL || node == m_end) {
+        if (node == NULL)
             return m_end;
-        }
         return node;
     }
     void    swap(Avl_tree& x) {
@@ -376,11 +335,25 @@ public:
         m_root = x_begin;
         m_end = x_end;
     }
-    AvlNode getLower_bound(value_type val) {
-        return lower_bound(findMin(m_root), val);
+    AvlNode lower_bound(const value_type val) {
+        AvlNode current = findMin(m_root);
+
+        while (current && current != m_end) {
+            if (!m_comp(current->data, val))
+                return current;
+            current = Avl_tree_increment(current);
+        }
+        return m_end;
     }
-    AvlNode getUpper_bound(value_type val) {
-        return upper_bound(findMin(m_root), val);
+    AvlNode upper_bound(const value_type val) {
+        AvlNode current = findMin(m_root);
+
+        while (current && current != m_end) {
+            if (m_comp(val, current->data))
+                return current;
+            current = Avl_tree_increment(current);
+        }
+        return m_end;
     }
 };
 

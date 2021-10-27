@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/24 11:02:17 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/27 16:48:57 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,16 +221,16 @@ public:
     return 1;
   }
   iterator lower_bound(const key_type& k) {
-    return iterator(m_Avl_tree.getLower_bound(ft::make_pair(k,mapped_type())));
+    return iterator(m_Avl_tree.lower_bound(ft::make_pair(k,mapped_type())));
   }
   const_iterator lower_bound(const key_type& k) const {
-    return const_iterator(m_Avl_tree.getLower_bound(ft::make_pair(k,mapped_type())));
+    return const_iterator(m_Avl_tree.lower_bound(ft::make_pair(k,mapped_type())));
   }
   iterator upper_bound(const key_type& k) {
-    return iterator(m_Avl_tree.getUpper_bound(ft::make_pair(k,mapped_type())));
+    return iterator(m_Avl_tree.upper_bound(ft::make_pair(k,mapped_type())));
   }
   const_iterator upper_bound(const key_type& k) const {
-    return const_iterator(m_Avl_tree.getUpper_bound(ft::make_pair(k,mapped_type())));
+    return const_iterator(m_Avl_tree.upper_bound(ft::make_pair(k,mapped_type())));
   }
   ft::pair<const_iterator,const_iterator> equal_range (const key_type& k) const {
     AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
