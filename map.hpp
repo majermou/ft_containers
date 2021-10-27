@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:07:39 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/27 16:48:57 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/27 18:40:28 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,7 @@ public:
   }
   size_type erase (const key_type& k) {
     AvlNode node = m_Avl_tree.search(ft::make_pair(k,mapped_type()));
-    
+
     if (!m_Avl_tree.getEndNode() || node == m_Avl_tree.getEndNode()) {
       return 0;
     }
@@ -182,16 +182,8 @@ public:
     return 1;
   }
   void erase (iterator first, iterator last) {
-    ft::vector<ft::pair<key_type,mapped_type> > elementsTodelete;
-
     while (first != last) {
-      elementsTodelete.push_back(ft::make_pair(first->first,first->second));
-      first++;
-    }
-    while (elementsTodelete.size() > 0) {
-      
-      m_Avl_tree.remove(elementsTodelete.back());
-      elementsTodelete.pop_back();
+      erase(first++);
     }
   }
   void swap (map& x) {

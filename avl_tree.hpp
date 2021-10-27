@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/27 17:18:09 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/27 18:38:07 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,14 @@ NodePtr  Avl_tree_increment(NodePtr x) {
 
 template<typename NodePtr>
 NodePtr Avl_tree_decrement(NodePtr x) {
+//   std::cout << x->data.first << std::endl;
   if (x->left) {
     NodePtr y = x->left;
     while (y->right) {
       y = y->right;
     }
     x = y;
-  } else {
+    } else {
     NodePtr y = x->parent;
     while (x == y->left) {
       x = y;
@@ -280,7 +281,7 @@ public:
         m_root = NULL;
         m_size = 0;
         m_end = m_allocator.allocate(1);
-        m_end->parent = NULL;
+        m_allocator.construct(m_end, value_type());
         m_end->left = m_root;
     }
     ~Avl_tree() {
@@ -291,9 +292,14 @@ public:
     void    insert(value_type data) {
         m_root = insertNode(m_root, data);
         m_root->parent = m_end;
+        m_end->left = m_root;
     }
     void    remove(value_type val) {
         m_root = removeNode(m_root, val);
+        if (m_root) {
+            m_root->parent = m_end;
+            m_end->left = m_root;
+        }
     }
     bool    isEmpty() const {
         return (m_size == 0);

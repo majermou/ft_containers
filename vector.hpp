@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 17:16:22 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/27 13:02:35 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/27 18:46:24 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ public:
     explicit vector(const allocator_type& alloc = allocator_type())
                     : m_buff(NULL),m_capacity(0),m_size(0),m_allocator(alloc) {
     }
-    explicit vector(size_type n, const value_type& val,
+    explicit vector(size_type n, const value_type& val = value_type(),
                     const allocator_type& alloc = allocator_type())
                     : m_capacity(n), m_size(0), m_allocator(alloc) {
         m_buff = m_allocator.allocate(m_capacity);
