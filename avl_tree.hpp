@@ -6,7 +6,7 @@
 /*   By: majermou <majermou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/11 16:03:51 by majermou          #+#    #+#             */
-/*   Updated: 2021/10/27 18:38:07 by majermou         ###   ########.fr       */
+/*   Updated: 2021/10/28 14:35:14 by majermou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,42 +37,41 @@ struct Node {
 
 template<typename NodePtr>
 NodePtr  Avl_tree_increment(NodePtr x) {
-  if (x->right) {
-    x = x->right;
-    while (x->left) {
-      x = x->left;
+    if (x->right) {
+        x = x->right;
+        while (x->left) {
+            x = x->left;
+        }
+    } else {
+        NodePtr y = x->parent;
+        while (x == y->right) {
+            x = y;
+            y = y->parent;
+        }
+        if (x->right != y) {
+            x = y;
+        }
     }
-  } else {
-    NodePtr y = x->parent;
-    while (x == y->right) {
-      x = y;
-      y = y->parent;
-    }
-    if (x->right != y) {
-      x = y;
-    }
-  }
-  return x;
+    return x;
 }
 
 template<typename NodePtr>
 NodePtr Avl_tree_decrement(NodePtr x) {
-//   std::cout << x->data.first << std::endl;
-  if (x->left) {
-    NodePtr y = x->left;
-    while (y->right) {
-      y = y->right;
-    }
-    x = y;
+    if (x->left) {
+        NodePtr y = x->left;
+        while (y->right) {
+            y = y->right;
+        }
+        x = y;
     } else {
-    NodePtr y = x->parent;
-    while (x == y->left) {
-      x = y;
-      y = y->parent;
+        NodePtr y = x->parent;
+        while (x == y->left) {
+            x = y;
+            y = y->parent;
+        }
+        x = y;
     }
-    x = y;
-  }
-  return x;
+    return x;
 }
 
 template <  typename T,
@@ -282,7 +281,6 @@ public:
         m_size = 0;
         m_end = m_allocator.allocate(1);
         m_allocator.construct(m_end, value_type());
-        m_end->left = m_root;
     }
     ~Avl_tree() {
         m_root = makeEmpty(m_root);
@@ -315,7 +313,7 @@ public:
         return m_allocator.max_size();
     }
     AvlNode getEndNode() const {
-        return (m_size == 0) ? NULL : m_end;
+        return m_end;
     }
     AvlNode getMinValNode() const {
         return findMin(m_root);

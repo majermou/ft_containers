@@ -2,7 +2,7 @@
 #include <string>
 #include <deque>
 #include <algorithm>
-#if 0//CREATE A REAL STL EXAMPLE
+#if 0 //CREATE A REAL STL EXAMPLE
 	#include <map>
 	#include <stack>
 	#include <vector>
@@ -106,18 +106,17 @@ int main(int argc, char** argv) {
 	
 
 	{
-		ft::map<int, int> copyconstruct(map_int);
 		ft::map<int, int> copy = map_int;
-		std::cout << "map.size() is " << map_int.size() << '\n';
-		ft::map<int, int>::iterator it = copy.begin();
-		ft::map<int, int>::const_iterator ite = copy.end();
+		std::cout << "map.size() is " << copy.size() << '\n';
 		std::cout << "min element is : " << std::min_element(copy.begin(), copy.end())->first << "==>" << std::min_element(copy.begin(), copy.end())->second << std::endl;
 		std::cout << "min element is : " << std::max_element(copy.begin(), copy.end())->first << "==>" << std::max_element(copy.begin(), copy.end())->second << std::endl;
+		ft::map<int, int>::reverse_iterator it = copy.rbegin();
+		ft::map<int, int>::const_reverse_iterator ite = copy.rend();
 		while (it != ite) {
 			std::cout << it->first << "-->" << it->second << std::endl;
 			it++;
 		}
-		std::cout << "map.size() is " << map_int.size() << '\n';
+		std::cout << "map.size() is " << copy.size() << '\n';
 		copy.erase(copy.begin(),copy.end());
 
 	}
